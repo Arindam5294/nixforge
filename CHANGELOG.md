@@ -10,3 +10,8 @@
 - 🧬 evolved: Periodic Messaging (new block `repeat`)
 - why: Enables sending repeated messages at set intervals, filling the gap for timed notifications
 - approved by Swanix 🐸
+
+## v0.3 · 2026-10-19 · E2
+- 🧬 evolved: 3D Website Builder (new block `threejs_build`)
+- why: Enables users to generate interactive 3D web pages using Three.js without external services.
+- approved by Swanix 🐸
