@@ -5,7 +5,7 @@ git config user.name "nixforge[bot]"
 git config user.email "nixforge@users.noreply.github.com"
 git add -A
 git diff --cached --quiet && { echo "🐸 nothing to save"; exit 0; }
-git commit -q -m "$1" -m "Forged-by: Swanix <nixforge>"
+git -c commit.gpgsign=false commit -q -m "$1" -m "Forged-by: Swanix <nixforge>"
 for i in 1 2 3 4 5; do
   git pull -q --rebase origin main && git push -q origin HEAD:main && exit 0
   sleep $((i * 3))

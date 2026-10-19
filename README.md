@@ -101,6 +101,12 @@ bash setup.sh
 
 It asks for a new Telegram bot token (@BotFather → `/newbot`), any free AI keys you have (Gemini / Groq / OpenRouter) and a Cloudflare *Edit Workers* token. Then it creates the repo, sets secrets, deploys the Worker, wires the bot, and runs the **heal demo**: a workflow broken on purpose that fixes itself and messages you.
 
+**If a step trips:**
+- Only the bot/dashboard failed? Run `bash scripts/worker.sh`. It redoes just the Cloudflare Worker. Add `CLOUDFLARE_ACCOUNT_ID=<id>` in front if your token lives on a different Cloudflare account.
+- Wrangler says *register a workers.dev subdomain*: claim one once at Cloudflare → Workers & Pages, then rerun.
+- `HTTP 403 … workflow dispatch`: the Codespace's built-in token can't start workflows. The scripts now run `gh auth login` for a real one.
+- Use an **API token** (Edit Cloudflare Workers template), never the Global API Key.
+
 ## 💬 Talk to it
 
 Just type what you want. Or:

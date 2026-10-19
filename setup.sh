@@ -56,7 +56,7 @@ sed -i "s#Arindam5294/nixforge#$REPO#g" worker/wrangler.toml workflows/heal-demo
 git init -q -b main 2>/dev/null || true
 git config user.name "$OWNER"; git config user.email "$OWNER@users.noreply.github.com"
 git add -A
-git commit -q -m "⚒ NIXFORGE v$(cat VERSION): the forge is lit" -m "Forged-by: Swanix <nixforge>" || true
+git -c commit.gpgsign=false commit -q -m "⚒ NIXFORGE v$(cat VERSION): the forge is lit" -m "Forged-by: Swanix <nixforge>" || true
 if gh repo view "$REPO" >/dev/null 2>&1; then
   git remote remove origin 2>/dev/null || true; git remote add origin "https://github.com/$REPO.git"; git push -u --force origin main
 else
@@ -73,7 +73,8 @@ gh secret set TELEGRAM_CHAT_ID   -R "$REPO" -b "$CHAT"
 ok "GitHub secrets set"
 
 # 6) Cloudflare Worker (the bot's voice + dashboard)
-export CLOUDFLARE_API_TOKEN="$CF"
+export CLOUDFLARE_API_TOKEN="$CF" CLOUDFLARE_ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID:-}"
+curl -s -H "Authorization: Bearer $CF" https://api.cloudflare.com/client/v4/user/tokens/verify | grep -q '"active"' || { echo "💥 Cloudflare token not valid. Fix it, then run: bash scripts/worker.sh"; exit 1; }
 cd worker
 OUT=$(npx -y wrangler@3 deploy 2>&1) || { echo "$OUT"; exit 1; }
 URL=$(echo "$OUT" | grep -oE 'https://[a-z0-9.-]+\.workers\.dev' | head -1)
