@@ -103,6 +103,54 @@ def chat(prompt: str, system: str = "You are NIXFORGE, a precise automation engi
     raise RuntimeError("all free brains are down: " + " | ".join(errors or ["no API keys set"]))
 
 
+def chat_long(prompt: str, system: str, max_tokens: int = 32000) -> tuple[str, bool]:
+    """Big outputs (whole websites). Returns (text, finished). finished=False means cut off."""
+    errors = []
+    if os.environ.get("GEMINI_API_KEY"):
+        for model in ("gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite"):
+            try:
+                r = requests.post(
+                    f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                    headers={"x-goog-api-key": os.environ["GEMINI_API_KEY"]},
+                    json={"systemInstruction": {"parts": [{"text": system}]},
+                          "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                          "generationConfig": {"temperature": 0.4, "maxOutputTokens": max_tokens,
+                                               "thinkingConfig": {"thinkingBudget": 1024}}},
+                    timeout=300)
+                if not r.ok:
+                    errors.append(f"gemini {model} {r.status_code}")
+                    continue
+                c = r.json()["candidates"][0]
+                text = "".join(p.get("text", "") for p in c.get("content", {}).get("parts", []))
+                if text:
+                    log(f"brain(long): gemini {model} answered")
+                    return text, c.get("finishReason") != "MAX_TOKENS"
+            except Exception as e:  # noqa: BLE001
+                errors.append(f"gemini {model}: {str(e)[:120]}")
+    for url, env, models in (("https://api.groq.com/openai/v1/chat/completions", "GROQ_API_KEY",
+                              ("openai/gpt-oss-120b", "openai/gpt-oss-20b")),
+                             ("https://openrouter.ai/api/v1/chat/completions", "OPENROUTER_API_KEY",
+                              ("openai/gpt-oss-20b:free",))):
+        if not os.environ.get(env):
+            continue
+        for m in models:
+            try:
+                r = requests.post(url, headers={"Authorization": f"Bearer {os.environ[env]}"},
+                                  json={"model": m, "temperature": 0.4, "max_tokens": max_tokens,
+                                        "messages": [{"role": "system", "content": system},
+                                                     {"role": "user", "content": prompt}]},
+                                  timeout=300)
+                if not r.ok:
+                    errors.append(f"{m} {r.status_code}: {r.text[:100]}")
+                    continue
+                ch = r.json()["choices"][0]
+                log(f"brain(long): {m} answered")
+                return ch["message"]["content"] or "", ch.get("finish_reason") != "length"
+            except Exception as e:  # noqa: BLE001
+                errors.append(f"{m}: {str(e)[:120]}")
+    raise RuntimeError("no brain could write a long answer: " + " | ".join(errors or ["no API keys set"]))
+
+
 def chat_json(prompt: str, system: str) -> dict:
     """Ask for JSON and dig it out even when the model wraps it in prose/fences."""
     text = chat(prompt + "\n\nReply with ONE JSON object only. No prose, no code fences.", system)

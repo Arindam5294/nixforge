@@ -13,7 +13,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from .llm import chat
+from .llm import chat_long
 from .sig import log
 
 THREE = "https://cdn.jsdelivr.net/npm/three@0.160.0"
@@ -32,6 +32,28 @@ real product site, not a demo. Hard rules:
   products on a podium, a scene with depth): MeshStandardMaterial/MeshPhysicalMaterial, key+rim+fill lights, RoomEnvironment for reflections,
   ACESFilmic tone mapping, soft shadows, gentle auto-rotation, camera framed so the subject fills the canvas. Never leave the canvas empty or black.
   Resize handler, devicePixelRatio capped at 2, requestAnimationFrame loop.
+- Start the 3D from this PROVEN skeleton and keep its renderer/camera/light/loop parts (fill in the subject):
+  <canvas id="stage"></canvas>  (CSS: give its container a real height, e.g. height:70vh; canvas width/height 100%)
+  <script type="module">
+  import * as THREE from 'three';
+  import {{ OrbitControls }} from 'three/addons/controls/OrbitControls.js';
+  import {{ RoomEnvironment }} from 'three/addons/environments/RoomEnvironment.js';
+  const canvas = document.getElementById('stage');
+  const renderer = new THREE.WebGLRenderer({{canvas, antialias:true, alpha:true, preserveDrawingBuffer:true}});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.shadowMap.enabled = true;
+  const scene = new THREE.Scene();
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100); camera.position.set(0, 1.2, 5);
+  const controls = new OrbitControls(camera, canvas); controls.enableDamping = true; controls.autoRotate = true; controls.target.set(0,0.8,0);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x222233, 1.2));
+  const key = new THREE.DirectionalLight(0xffffff, 2.5); key.position.set(3,5,4); key.castShadow = true; scene.add(key);
+  // SUBJECT: build it here, roughly 2 units tall, centred near y=0.8, plus a podium/floor that receives shadows
+  function resize(){{ const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w,h,false); camera.aspect = w/h; camera.updateProjectionMatrix(); }}
+  addEventListener('resize', resize); resize();
+  renderer.setAnimationLoop(() => {{ controls.update(); renderer.render(scene, camera); }});
+  </script>
+- Keep the page compact: lean CSS, no giant repeated blocks, so the WHOLE file fits (aim under 30 KB). Always finish with </html>.
 - Games: start screen, score, restart, keyboard + touch controls, sound via WebAudio.
 - No external images that might 404; use CSS gradients, SVG, emoji or procedural canvas textures.
 Return ONLY the HTML, starting with <!DOCTYPE html>."""
@@ -53,6 +75,9 @@ def repair(html: str) -> str:
     if re.search(r"from\s+['\"]three(/addons/[^'\"]*)?['\"]", html):
         html = re.sub(r"<head([^>]*)>", lambda m: f"<head{m.group(1)}>\n{IMPORTMAP}", html, count=1, flags=re.I) \
             if re.search(r"<head", html, re.I) else IMPORTMAP + html
+    # imports inside a classic <script> are a SyntaxError: promote those scripts to modules
+    html = re.sub(r"<script(?![^>]*\btype=)([^>]*)>(?=(?:(?!</script>).)*?\bimport\s[^;]*?\bfrom\s*['\"])",
+                  r'<script type="module"\1>', html, flags=re.S | re.I)
     if "viewport" not in html:
         html = re.sub(r"<head([^>]*)>", r'<head\1>\n<meta name="viewport" content="width=device-width,initial-scale=1">', html, count=1, flags=re.I)
     return html
@@ -109,23 +134,54 @@ def inspect(html: str, shot: Path) -> list[str]:
     return list(dict.fromkeys(problems))[:12]
 
 
+def _write(prompt: str) -> str:
+    """Write a whole page; if the model stops mid-file, make it continue (up to 3 times)."""
+    text, done = chat_long(prompt, SYSTEM)
+    text = _clean(text)
+    for _ in range(3):
+        if done and "</html>" in text.lower():
+            break
+        more, done = chat_long(prompt + "\n\nYou already wrote the start below but got cut off. Output ONLY the "
+                               "continuation, starting exactly after the last character, no repetition, no fences, "
+                               "and finish the file with </html>.\n\nWRITTEN SO FAR (last part):\n" + text[-6000:], SYSTEM)
+        more = re.sub(r"^```(?:html)?\s*|```\s*$", "", more.strip())
+        text += more
+    return text
+
+
+def structural(html: str) -> list[str]:
+    low, probs = html.lower(), []
+    if "</html>" not in low:
+        probs.append("the file is cut off: it never reaches </html>")
+    if "<script" not in low:
+        probs.append("there is no <script> at all, so nothing is interactive or 3D")
+    if "<canvas" in low and "webglrenderer" not in low and "getcontext" not in low:
+        probs.append("there is a <canvas> but no code ever draws into it (no THREE.WebGLRenderer)")
+    return probs
+
+
 def build_site(brief: str, workdir: Path, rounds: int = 3):
-    html = repair(_clean(chat(f"BRIEF: {brief}\n\nWrite the full index.html now.", SYSTEM)))
+    html = repair(_write(f"BRIEF: {brief}\n\nWrite the full index.html now."))
     shot, problems = None, []
     if not _browser_ready():
-        log("sitebuilder: no headless browser, shipping unchecked")
-        return html, None, ["not browser-checked"]
+        for _ in range(rounds - 1):
+            p = structural(html)
+            if not p:
+                break
+            html = repair(_write(f"BRIEF: {brief}\n\nFix: {'; '.join(p)}. Write the COMPLETE index.html."))
+        log("sitebuilder: no headless browser, structural check only")
+        return html, None, structural(html)
     for n in range(rounds):
         shot = workdir / f"shot{n}.png"
+        problems = structural(html)
         try:
-            problems = inspect(html, shot)
+            problems += inspect(html, shot)
         except Exception as e:  # noqa: BLE001
-            problems = [f"could not open page: {e}"]
+            problems.append(f"could not open page: {e}")
         log(f"sitebuilder round {n + 1}: {problems or 'clean'}")
         if not problems or n == rounds - 1:
             break
-        fix = chat(f"BRIEF: {brief}\n\nThis index.html has problems when opened in Chrome on a phone:\n- "
-                   + "\n- ".join(problems) + f"\n\nCURRENT HTML:\n{html[:60000]}\n\n"
-                   "Fix every problem and return the COMPLETE corrected index.html (keep and improve the design).", SYSTEM)
-        html = repair(_clean(fix))
+        html = repair(_write(f"BRIEF: {brief}\n\nThe previous version had these problems in Chrome on a phone:\n- "
+                             + "\n- ".join(problems) + f"\n\nPREVIOUS HTML (reuse its copy and design):\n{html[:40000]}\n\n"
+                             "Write the COMPLETE corrected index.html from scratch, fixing every problem."))
     return html, (shot if shot and shot.exists() else None), problems

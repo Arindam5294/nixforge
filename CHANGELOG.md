@@ -1,5 +1,10 @@
 # ⚒ NIXFORGE changelog
 
+## v0.4.4 — no more blank pages
+- Websites are written with a long-output brain (up to 32k tokens) and auto-continued if the model stops mid-file.
+- Proven three.js skeleton in the prompt; scripts that use import are auto-promoted to modules.
+- Structural check (cut-off file, no script, canvas nobody draws on) on top of the headless-Chrome check.
+
 ## v0.4.3 — sites that actually work
 - New h.build_site(): art-director prompt, auto-fixed three.js imports (importmap), then a real headless-Chrome check (JS errors, blank 3D canvas, empty page) with up to 3 rewrite rounds. Sends you a screenshot with the link.
 - Planner always uses it for websites, stores, apps, games and 3D.
