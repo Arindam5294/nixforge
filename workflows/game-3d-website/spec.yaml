@@ -2,7 +2,7 @@
 id: game_3d_website
 title: 3D Game Website
 tz: Asia/Kolkata
-status: pending
+status: active
 steps:
 - id: main
   use: code
