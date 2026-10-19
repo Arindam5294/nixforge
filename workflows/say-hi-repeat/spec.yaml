@@ -1,0 +1,19 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: say_hi_repeat
+title: Say hi every second for 5 seconds
+status: pending
+tz: Asia/Kolkata
+steps:
+- id: ping
+  use: repeat
+  with:
+    action:
+      use: telegram
+      with:
+        text: hi
+    interval_seconds: 1
+    count: 5
+tests:
+- '{{ ping.executed }} == 5'
+request: Let's suppose say me hi every 1 second for next 5 seconds
+summary: Sends a Telegram "hi" message every second, five times.

@@ -1,7 +1,7 @@
 {
   "_day": {
     "date": "2026-10-19",
-    "count": 4
+    "count": 7
   },
   "heal-demo": {
     "incident": "cdd462e3",
@@ -16,5 +16,12 @@
     "broken_since": "2026-10-19T19:06:27+00:00",
     "cooldown_until": "2026-10-20T01:06:27+00:00",
     "last_giveup": "3 fix attempts didn't work (last error: after your last patch (step latest): selector 'body' matched nothing)"
+  },
+  "say-hi-repeat": {
+    "incident": "6ba4ea50",
+    "tries": 0,
+    "broken_since": "2026-10-19T19:09:26+00:00",
+    "cooldown_until": "2026-10-20T01:09:26+00:00",
+    "last_giveup": "3 fix attempts didn't work (last error: previous patch refused: heal tried to add/remove a side-effect step (messages, uploads); refused)"
   }
 }
