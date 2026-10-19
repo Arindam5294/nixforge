@@ -1,7 +1,7 @@
 {
   "_day": {
     "date": "2026-10-19",
-    "count": 8
+    "count": 9
   },
   "heal-demo": {
     "incident": "cdd462e3",
@@ -30,5 +30,12 @@
     "probation": true,
     "last_fix": "Template URL returned 404",
     "healed_at": "2026-10-19T19:23:29+00:00"
+  },
+  "build-3d-site": {
+    "incident": "8b525ef6",
+    "tries": 0,
+    "probation": true,
+    "last_fix": "The threejs_build step failed because the template_url https://example.com/3d-template.html returned a 404 error.",
+    "healed_at": "2026-10-19T19:26:46+00:00"
   }
 }
