@@ -1,0 +1,36 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: game_3d_website
+title: 3D Game Website
+tz: Asia/Kolkata
+status: active
+steps:
+- id: main
+  use: code
+  with:
+    source: |
+      def run(h):
+          prompt = (
+              'Write ONE complete self-contained index.html file for a sleek, playable 3D browser game. '
+              'Use Three.js via ES module from https://unpkg.com/three@0.160.0/build/three.module.js. '
+              'Theme: 3D neon obstacle dodger / runner. '
+              'Include smooth keyboard (WASD / Arrow keys) and mobile touch controls, real-time score display, '
+              'game over screen with restart button, audio effects via Web Audio API, and dynamic lighting. '
+              'Return ONLY valid HTML starting with <!DOCTYPE html>.'
+          )
+          html = h.llm(prompt)
+          if '```html' in html:
+              html = html.split('```html', 1)[1].split('```', 1)[0].strip()
+          elif '```' in html:
+              html = html.split('```', 1)[1].split('```', 1)[0].strip()
+          start = html.find('<!')
+          if start != -1:
+              html = html[start:]
+          url = h.publish('index.html', html)
+          h.notify(f'🎮 Your 3D game website is ready! Play here:\n{url}')
+          return url
+tests:
+- str(main).startswith('http')
+request: Build a 3d website now on a game
+summary: |
+  Builds an interactive 3D web game using Three.js and hosts it online.
+  Sends you the playable game link directly on Telegram.

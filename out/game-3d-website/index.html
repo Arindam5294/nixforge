@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Neon Runner</title>
+<style>
+  html, body { margin:0; padding:0; overflow:hidden; height:100%; background:#000; font-family:sans-serif; }
+  #score { position:absolute; top:10px; left:10px; color:#0ff; font-size:24px; z-index:10; }
+  #overlay { position:absolute; inset:0; background:rgba(0,0,0,0.85); color:#0ff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:32px; z-index:20; visibility:hidden; }
+  #overlay button { margin-top:20px; padding:10px 20px; font-size:24px; cursor:pointer; background:#0ff; border:none; color:#000; }
+  .touch-btn { position:absolute; width:20%; height:20%; opacity:0.2; z-index:15; }
+  #up    { top:5%; left:40%; }
+  #down  { bottom:5%; left:40%; }
+  #left  { top:40%; left:5%; }
+  #right { top:40%; right:5%; }
+</style>
+</head>
+<body>
+<div id="score">Score: 0</div>
+<div id="overlay">
+  <div id="gameover">Game Over</div>
+  <div id="finalScore"></div>
+  <button id="restartBtn">Restart</button>
+</div>
+<div id="up"    class="touch-btn"></div>
+<div id="down"  class="touch-btn"></div>
+<div id="left"  class="touch-btn"></div>
+<div id="right" class="touch-btn"></div>
+
+<script type="module">
+import {
+  Scene, PerspectiveCamera, WebGLRenderer,
+  BoxGeometry, MeshStandardMaterial, Mesh,
+  AmbientLight, DirectionalLight, Color,
+  Vector3, Clock, Raycaster, PlaneGeometry
+} from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+
+let scene, camera, renderer, clock;
+let player, obstacles = [], obstaclePool = [];
+let moveLeft = false, moveRight = false, moveUp = false, moveDown = false;
+let score = 0, gameRunning = false;
+let scoreEl = document.getElementById('score');
+let overlay = document.getElementById('overlay');
+let finalScoreEl = document.getElementById('finalScore');
+let restartBtn = document.getElementById('restartBtn');
+let audioCtx, bgGain, beepGain;
+
+// ---------- AUDIO ----------
+function initAudio() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  // Background tone (low hum)
+  const osc = audioCtx.createOscillator();
+  bgGain = audioCtx.createGain();
+  osc.frequency.value = 30;
+  bgGain.gain.value = 0.02;
+  osc.connect(bgGain).connect(audioCtx.destination);
+  osc.start();
+
+  // Beep for collision
+  beepGain = audioCtx.createGain();
+  beepGain.gain.value = 0;
+  beepGain.connect(audioCtx.destination);
+}
+function playBeep() {
+  const osc = audioCtx.createOscillator();
+  osc.frequency.value = 440;
+  osc.type = 'square';
+  osc.connect(beepGain);
+  beepGain.gain.setTargetAtTime(0.2, audioCtx.currentTime, 0.01);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.1);
+}
+
+// ---------- INIT ----------
+function init() {
+  // Scene & Camera
+  scene = new Scene();
+  scene.background = new Color(0x000010);
+  camera = new PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 200);
+  camera.position.set(0, 5, 15);
+  camera.lookAt(0, 0, 0);
+
+  // Renderer
+  renderer = new WebGLRenderer({ antialias: true });
+  renderer.setSize(innerWidth, innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  // Lights
+  const ambient = new AmbientLight(0x404080, 0.5);
+  scene.add(ambient);
+  const dir = new DirectionalLight(0x80c0ff, 1);
+  dir.position.set(5, 10, 7);
+  scene.add(dir);
+
+  // Player
+  const geo = new BoxGeometry(1, 1, 1);
+  const mat = new MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 0.5 });
+  player = new Mesh(geo, mat);
+  player.position.set(0, 0.5, 0);
+  scene.add(player);
+
+  // Ground (invisible plane for raycasting)
+  const groundGeo = new PlaneGeometry(200, 200);
+  const groundMat = new MeshStandardMaterial({ visible: false });
+  const ground = new Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = 0;
+  scene.add(ground);
+
+  // Clock
+  clock = new Clock();
+
+  // Events
+  window.addEventListener('resize', onWindowResize);
+  window.addEventListener('keydown', onKeyDown);
+  window.addEventListener('keyup', onKeyUp);
+  initTouchControls();
+
+  restartBtn.addEventListener('click', restartGame);
+  initAudio();
+  startGame();
+}
+
+// ---------- RESIZE ----------
+function onWindowResize() {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+}
+
+// ---------- INPUT ----------
+function onKeyDown(e) {
+  switch (e.code) {
+    case 'ArrowLeft': case 'KeyA': moveLeft = true; break;
+    case 'ArrowRight': case 'KeyD': moveRight = true; break;
+    case 'ArrowUp': case 'KeyW': moveUp = true; break;
+    case 'ArrowDown': case 'KeyS': moveDown = true; break;
+  }
+}
+function onKeyUp(e) {
+  switch (e.code) {
+    case 'ArrowLeft': case 'KeyA': moveLeft = false; break;
+    case 'ArrowRight': case 'KeyD': moveRight = false; break;
+    case 'ArrowUp': case 'KeyW': moveUp = false; break;
+    case 'ArrowDown': case 'KeyS': moveDown = false; break;
+  }
+}
+function initTouchControls() {
+  const btns = {
+    up: document.getElementById('up'),
+    down: document.getElementById('down'),
+    left: document.getElementById('left'),
+    right: document.getElementById('right')
+  };
+  const set = (name, val) => { window[name] = val; };
+  Object.entries(btns).forEach(([name, el]) => {
+    el.addEventListener('pointerdown', () => set(name, true));
+    el.addEventListener('pointerup', () => set(name, false));
+    el.addEventListener('pointerleave', () => set(name, false));
+  });
+}
+
+// ---------- GAME LOGIC ----------
+function startGame() {
+  score = 0;
+  gameRunning = true;
+  overlay.style.visibility = 'hidden';
+  scoreEl.textContent = 'Score: 0';
+  player.position.set(0, 0.5, 0);
+  obstacles.forEach(o => scene.remove(o));
+  obstacles = [];
+  // Pre‑populate pool
+  for (let i = 0; i < 20; i++) {
+    const geo = new BoxGeometry(1, 1, 1);
+    const mat = new MeshStandardMaterial({ color: 0xff00ff, emissive: 0xff00ff, emissiveIntensity: 0.6 });
+    const mesh = new Mesh(geo, mat);
+    mesh.visible = false;
+    scene.add(mesh);
+    obstaclePool.push(mesh);
+  }
+  clock.start();
+  animate();
+}
+function restartGame() {
+  startGame();
+}
+function spawnObstacle() {
+  const obs = obstaclePool.length ? obstaclePool.pop() : new Mesh(
+    new BoxGeometry(1, 1, 1),
+    new MeshStandardMaterial({ color: 0xff00ff, emissive: 0xff00ff, emissiveIntensity: 0.6 })
+  );
+  const lane = (Math.random() - 0.5) * 8; // X position
+  const height = 0.5;
+  const zPos = -80 - Math.random() * 20;
+  obs.position.set(lane, height, zPos);
+  obs.visible = true;
+  obstacles.push(obs);
+}
+function updateObstacles(delta) {
+  const speed = 20 + score * 0.05;
+  obstacles.forEach((obs, idx) => {
+    obs.position.z += speed * delta;
+    if (obs.position.z > 5) {
+      // recycle
+      obs.visible = false;
+      obstaclePool.push(obs);
+      obstacles.splice(idx, 1);
+    }
+  });
+  // spawn new obstacles periodically
+  if (Math.random() < 0.02) spawnObstacle();
+}
+function checkCollisions() {
+  const playerBox = new THREE.Box3().setFromObject(player);
+  for (let obs of obstacles) {
+    const obsBox = new THREE.Box3().setFromObject(obs);
+    if (playerBox.intersectsBox(obsBox)) {
+      gameOver();
+      playBeep();
+      break;
+    }
+  }
+}
+function gameOver() {
+  gameRunning = false;
+  overlay.style.visibility = 'visible';
+  finalScoreEl.textContent = `Score: ${Math.floor(score)}`;
+}
+
+// ---------- ANIMATION ----------
+function animate() {
+  if (!gameRunning) return;
+  const delta = clock.getDelta();
+
+  // Player movement
+  const moveSpeed = 10;
+  if (moveLeft)  player.position.x -= moveSpeed * delta;
+  if (moveRight) player.position.x += moveSpeed * delta;
+  if (moveUp)    player.position.z -= moveSpeed * delta;
+  if (moveDown)  player.position.z += moveSpeed * delta;
+
+  // Keep player within bounds
+  player.position.x = Math.max(-8, Math.min(8, player.position.x));
+  player.position.z = Math.max(-5, Math.min(5, player.position.z));
+
+  // Update obstacles
+  updateObstacles(delta);
+  checkCollisions();
+
+  // Score
+  score += delta * 10;
+  scoreEl.textContent = `Score: ${Math.floor(score)}`;
+
+  // Dynamic lighting (pulse)
+  const time = clock.elapsedTime;
+  const intensity = 0.5 + 0.5 * Math.sin(time * 2);
+  scene.traverse(obj => {
+    if (obj.isMesh && obj.material.emissive) {
+      obj.material.emissiveIntensity = intensity;
+    }
+  });
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+// ---------- START ----------
+init();
+</script>
+</body>
+</html>
