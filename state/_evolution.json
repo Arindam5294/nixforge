@@ -1,5 +1,5 @@
 {
-  "next": 2,
+  "next": 3,
   "items": {
     "E1": {
       "worth_it": true,
@@ -13,6 +13,18 @@
       "source": "request I couldn't do yet: Let's suppose say me hi every 1 second for next 5 seconds",
       "at": "2026-10-19T19:04:24+00:00",
       "version": "0.2"
+    },
+    "E2": {
+      "worth_it": true,
+      "title": "3D Website Builder",
+      "why": "Enables users to generate interactive 3D web pages using Three.js without external services.",
+      "what": "Adds a block that compiles HTML/JS with Three.js scenes from given assets and returns a hosted URL.",
+      "risk": "Potentially heavy compute and storage usage.",
+      "block_name": "threejs_build",
+      "block_doc": "threejs_build(template_url:str, assets:list, config:dict=None) -> str # returns URL of generated 3D site",
+      "status": "pitched",
+      "source": "request I couldn't do yet: Can you build a 3d website for me ?",
+      "at": "2026-10-19T19:10:58+00:00"
     }
   }
 }
