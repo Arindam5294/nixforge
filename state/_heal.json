@@ -6,7 +6,7 @@
   "heal-demo": {
     "incident": "cdd462e3",
     "tries": 0,
-    "probation": true,
+    "probation": false,
     "last_fix": "Selector h2.page-title does not exist in the fetched page",
     "healed_at": "2026-10-19T18:18:22+00:00"
   }
