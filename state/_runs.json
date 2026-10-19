@@ -1,0 +1,9 @@
+{
+  "heal-demo": [
+    {
+      "at": "2026-10-19T18:17:55+00:00",
+      "ok": false,
+      "note": "selector 'h2.page-title' matched nothing"
+    }
+  ]
+}
