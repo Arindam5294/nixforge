@@ -1,7 +1,7 @@
 {
   "_day": {
     "date": "2026-10-19",
-    "count": 7
+    "count": 8
   },
   "heal-demo": {
     "incident": "cdd462e3",
@@ -23,5 +23,12 @@
     "broken_since": "2026-10-19T19:09:26+00:00",
     "cooldown_until": "2026-10-20T01:09:26+00:00",
     "last_giveup": "3 fix attempts didn't work (last error: previous patch refused: heal tried to add/remove a side-effect step (messages, uploads); refused)"
+  },
+  "game-3d-site": {
+    "incident": "c28dbc44",
+    "tries": 0,
+    "probation": true,
+    "last_fix": "Template URL returned 404",
+    "healed_at": "2026-10-19T19:23:29+00:00"
   }
 }
