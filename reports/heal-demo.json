@@ -1,9 +1,0 @@
-{
-  "wf": "heal-demo",
-  "step": "headline",
-  "error": "selector 'h2.page-title' matched nothing",
-  "hint": "PAGE OUTLINE:\nhead > title  ::  NIXFORGE demo\nhtml > body  ::  The forge is hot 🔥 describe it. forge it. it heals. Notice 1\nbody > header.forge-header  ::  The forge is hot 🔥\nheader.forge-header > h1.forge-title  ::  The forge is hot 🔥\nbody > main  ::  describe it. forge it. it heals. Notice 1: NIXFORGE v0.1 is \nmain > p.tagline  ::  describe it. forge it. it heals.\nmain > ul.notices  ::  Notice 1: NIXFORGE v0.1 is live\nul.notices > li  ::  Notice 1: NIXFORGE v0.1 is live",
-  "trace": "Traceback (most recent call last):\n  File \"/home/runner/work/nixforge/nixforge/forge/runner.py\", line 92, in run_real\n    execute(wf_id, spec, inputs)\n  File \"/home/runner/work/nixforge/nixforge/forge/runner.py\", line 51, in execute\n    ctx[sid] = REGISTRY[step[\"use\"]][\"fn\"](ctx, **args)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/nixforge/nixforge/forge/blocks.py\", line 95, in select\n    raise StepError(f\"selector '{css}' matched nothing\", hint=\"PAGE OUTLINE:\\n\" + _outline(html or \"\"))\nforge.core.StepError: selector 'h2.page-title' matched nothing\n",
-  "inputs": {},
-  "at": "2026-10-19T18:17:55+00:00"
-}
