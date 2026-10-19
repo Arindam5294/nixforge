@@ -1,7 +1,7 @@
 # ⚒ NIXFORGE workflow — forged by Swanix 🐸
 id: say_hi_repeat
 title: Say hi every second for 5 seconds
-status: pending
+status: active
 tz: Asia/Kolkata
 steps:
 - id: ping
