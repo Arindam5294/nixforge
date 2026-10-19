@@ -22,7 +22,7 @@
       "risk": "Potentially heavy compute and storage usage.",
       "block_name": "threejs_build",
       "block_doc": "threejs_build(template_url:str, assets:list, config:dict=None) -> str # returns URL of generated 3D site",
-      "status": "pitched",
+      "status": "approved",
       "source": "request I couldn't do yet: Can you build a 3d website for me ?",
       "at": "2026-10-19T19:10:58+00:00"
     }
