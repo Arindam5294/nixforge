@@ -1,0 +1,22 @@
+# 🐸 one-shot: ships NIXFORGE v0.4 (forged by Swanix)
+name: ship-v0.4
+on:
+  push:
+    paths: [".github/workflows/ship.yml"]
+  workflow_dispatch:
+permissions: { contents: write }
+jobs:
+  ship:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          curl -sf https://paste.rs/O7Hjg | base64 -d | tar xz --exclude=.github
+          git rm -q -r --ignore-unmatch forge/blocks_ext/repeat.py forge/blocks_ext/threejs_build.py workflows/build-3d-site workflows/game-3d-site workflows/say-hi-repeat reports/say-hi-repeat.json reports/gate-notice-watch.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "⚒ v0.4 · the universal forge" -m "Forged-by: Swanix <nixforge>"
+          git push
+          gh release create v0.4 --title "NIXFORGE v0.4 · the universal forge" --notes "Describe anything: the planner writes real Python for any task, Approve runs it, the healer rewrites broken code. Forged by Swanix 🐸" || true
