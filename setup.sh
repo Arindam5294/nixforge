@@ -58,7 +58,7 @@ git config user.name "$OWNER"; git config user.email "$OWNER@users.noreply.githu
 git add -A
 git commit -q -m "⚒ NIXFORGE v$(cat VERSION): the forge is lit" -m "Forged-by: Swanix <nixforge>" || true
 if gh repo view "$REPO" >/dev/null 2>&1; then
-  git remote remove origin 2>/dev/null || true; git remote add origin "https://github.com/$REPO.git"; git push -u origin main
+  git remote remove origin 2>/dev/null || true; git remote add origin "https://github.com/$REPO.git"; git push -u --force origin main
 else
   gh repo create "$REPO" --public --description "⚒ Describe any automation in plain words. NIXFORGE forges it, runs it, and heals itself. — by Swanix 🐸" --source . --push
 fi
