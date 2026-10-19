@@ -1,0 +1,96 @@
+# ─────────────────────────────────────────────────────────────
+#  ⚒  NIXFORGE · the forge loop — run → (fail?) → heal → promote
+#  forged by Swanix 🐸
+# ─────────────────────────────────────────────────────────────
+name: "⚒ forge"
+on:
+  schedule:
+    - cron: "*/15 * * * *"        # tick: run whatever is due
+  workflow_dispatch:
+    inputs:
+      wf:     { description: "workflow id (blank = whatever is due)", required: false, default: "" }
+      inputs: { description: "k=v pairs, space separated", required: false, default: "" }
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nixforge-state
+  cancel-in-progress: false
+
+env:
+  NIXFORGE_QUIET: "1"
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
+  GEMINI_API_KEY:     ${{ secrets.GEMINI_API_KEY }}
+  GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      failed: ${{ steps.run.outputs.failed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - id: run
+        name: "🐸 strike the anvil"
+        env: { WF: "${{ inputs.wf }}", INPUTS: "${{ inputs.inputs }}" }
+        run: |
+          if [ -n "$WF" ]; then
+            ARGS=(); for kv in $INPUTS; do ARGS+=(--input "$kv"); done
+            python -m forge.runner run "$WF" "${ARGS[@]}"
+          else
+            python -m forge.runner due
+          fi
+      - name: "💾 save state"
+        if: always()
+        run: |
+          bash scripts/commit.sh "🐸 run: state update"
+
+  heal:
+    needs: run
+    if: needs.run.outputs.failed != '' && needs.run.outputs.failed != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        wf: ${{ fromJSON(needs.run.outputs.failed) }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main }
+      - run: git pull --rebase origin main || true
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - id: heal
+        name: "🩹 phoenix loop"
+        run: python -m forge.healer "${{ matrix.wf }}"
+      - name: "🌿 heal branch → promote"
+        if: steps.heal.outputs.healed == 'true'
+        env: { DIAG: "${{ steps.heal.outputs.diagnosis }}" }
+        run: |
+          N=$(date +%s)
+          git config user.name "nixforge[bot]"; git config user.email "nixforge@users.noreply.github.com"
+          git checkout -b "heal/${{ matrix.wf }}-$N"
+          git add -A
+          git commit -m "🩹 heal(${{ matrix.wf }}): $DIAG" -m "Tested in sandbox before promotion." -m "Forged-by: Swanix <nixforge>"
+          git push origin "heal/${{ matrix.wf }}-$N"
+          git checkout main && git pull --rebase origin main
+          git merge --no-ff "heal/${{ matrix.wf }}-$N" -m "⚒ promote heal/${{ matrix.wf }}-$N" -m "Forged-by: Swanix <nixforge>"
+          git push origin main
+      - name: "🔁 re-run healed workflow for real"
+        if: steps.heal.outputs.healed == 'true'
+        run: |
+          python -m forge.runner run "${{ matrix.wf }}"
+          bash scripts/commit.sh "🐸 run: post-heal verification"
+      - name: "💾 save state"
+        if: steps.heal.outputs.healed != 'true'
+        run: |
+          bash scripts/commit.sh "🩹 heal: state update (${{ matrix.wf }})"

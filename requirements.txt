@@ -1,0 +1,7 @@
+# ⚒ NIXFORGE — forged by Swanix 🐸
+requests>=2.31
+pyyaml>=6
+beautifulsoup4>=4.12
+feedparser>=6
+croniter>=2
+yt-dlp

@@ -1,0 +1,23 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+# Website change watcher → Telegram. Edit url/css, then /resume site-watch
+id: site_watch
+title: Website change watcher
+schedule: "*/30 * * * *"
+tz: Asia/Kolkata
+status: paused
+steps:
+  - id: page
+    use: fetch
+    with: {url: "https://gate2027.iitg.ac.in/"}
+  - id: latest
+    use: select
+    with: {html: "{{ page }}", css: "body"}
+  - id: watch
+    use: diff
+    with: {key: "latest", value: "{{ latest }}"}
+  - id: ping
+    use: telegram
+    when: "{{ watch.changed }}"
+    with: {text: "🔔 The page changed:\n{{ watch.delta }}"}
+tests:
+  - "len(latest) > 0"

@@ -1,0 +1,21 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+# The forced-failure demo: the selector below is WRONG on purpose.
+# Send /run heal-demo and watch NIXFORGE notice, diagnose, patch, test and heal it.
+id: heal_demo
+title: Self-healing demo (broken on purpose)
+tz: Asia/Kolkata
+status: active
+inputs:
+  page: "https://raw.githubusercontent.com/Arindam5294/nixforge/main/assets/demo.html"
+steps:
+  - id: page
+    use: fetch
+    with: {url: "{{ inputs.page }}"}
+  - id: headline
+    use: select
+    with: {html: "{{ page }}", css: "h2.page-title"}
+  - id: ping
+    use: telegram
+    with: {text: "🧪 Heal demo works. Headline: {{ headline }}"}
+tests:
+  - "len(headline) > 0"

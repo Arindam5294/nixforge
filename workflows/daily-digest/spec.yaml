@@ -1,0 +1,27 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+# Every morning 8:00 IST: top stories, summarised by the free LLM chain.
+# Ships paused. Turn on with /resume daily-digest
+id: daily_digest
+title: Morning digest
+schedule: "0 8 * * *"
+tz: Asia/Kolkata
+status: paused
+steps:
+  - id: news
+    use: rss
+    with:
+      limit: 6
+      urls:
+        - https://news.google.com/rss/search?q=agriculture+india&hl=en-IN&gl=IN&ceid=IN:en
+        - https://news.google.com/rss/search?q=GATE+2027&hl=en-IN&gl=IN&ceid=IN:en
+        - https://news.google.com/rss/search?q=crypto&hl=en-IN&gl=IN&ceid=IN:en
+  - id: brief
+    use: llm
+    with:
+      prompt: "Write a 6-bullet morning brief (one line each, emoji first) from these headlines for Swanix, an agri engineer + Web3 builder. Headlines: {{ news }}"
+  - id: send
+    use: telegram
+    with: {text: "☀️ Morning digest · {{ now }}\n\n{{ brief }}"}
+tests:
+  - "len(news) > 0"
+  - "len(brief) > 40"

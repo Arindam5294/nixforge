@@ -1,0 +1,11 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+# On demand from Telegram:  /convert <link> mp3
+id: convert
+title: Link → converted file
+tz: Asia/Kolkata
+status: active
+inputs: {url: "", format: "mp3"}
+steps:
+  - id: file
+    use: convert
+    with: {url: "{{ inputs.url }}", format: "{{ inputs.format }}"}

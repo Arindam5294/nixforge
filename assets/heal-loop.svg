@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 530" width="900" height="530" font-family="ui-sans-serif,system-ui,Segoe UI,Arial,sans-serif">
+  <!-- ⚒ NIXFORGE phoenix loop — forged by Swanix 🐸 -->
+  <defs>
+    <style>
+      .node{fill:#10131c;stroke:#2a3246;stroke-width:2}
+      .lbl{fill:#e8ecf4;font-size:17px;font-weight:700;text-anchor:middle}
+      .sub{fill:#8a93a6;font-size:12.5px;text-anchor:middle}
+      .ring{fill:none;stroke:#1f2638;stroke-width:3;stroke-dasharray:6 8}
+      .lit{animation:lit 9s infinite}
+      @keyframes lit{0%,100%{stroke:#2a3246}8%,14%{stroke:#22e1ff}}
+      .n1{animation-delay:0s}.n2{animation-delay:1.5s}.n3{animation-delay:3s}.n4{animation-delay:4.5s}.n5{animation-delay:6s}.n6{animation-delay:7.5s}
+      .fail{animation:fail 9s infinite;animation-delay:1.5s}
+      @keyframes fail{0%,100%{stroke:#2a3246}8%,14%{stroke:#ff5d5d}}
+      .ok{animation:ok 9s infinite;animation-delay:7.5s}
+      @keyframes ok{0%,100%{stroke:#2a3246}8%,14%{stroke:#3dff8a}}
+      .spin{animation:spin 30s linear infinite;transform-origin:450px 270px}
+      @keyframes spin{to{transform:rotate(360deg)}}
+    </style>
+    <radialGradient id="core" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ff9a3d" stop-opacity=".45"/><stop offset="1" stop-color="#ff9a3d" stop-opacity="0"/></radialGradient>
+    <path id="orbit" d="M450,90 A180,180 0 1,1 449.9,90"/>
+  </defs>
+  <rect width="900" height="530" rx="22" fill="#07080d"/>
+  <circle cx="450" cy="270" r="120" fill="url(#core)"/>
+  <circle class="ring spin" cx="450" cy="270" r="180"/>
+
+  <!-- traveling ember -->
+  <circle r="8" fill="#ffb347"><animateMotion dur="9s" repeatCount="indefinite" rotate="auto"><mpath href="#orbit"/></animateMotion></circle>
+  <circle r="16" fill="#ffb347" opacity=".25"><animateMotion dur="9s" repeatCount="indefinite"><mpath href="#orbit"/></animateMotion></circle>
+
+  <text x="450" y="262" class="lbl" font-size="22">🔥 phoenix loop</text>
+  <text x="450" y="286" class="sub">max 3 tries · 10/day · auto-rollback</text>
+
+  <!-- 6 stations around the ring -->
+  <g><rect class="node lit n1" x="375" y="62" width="150" height="56" rx="12"/><text class="lbl" x="450" y="86">▶ run</text><text class="sub" x="450" y="104">retry ×3 + fallback</text></g>
+  <g><rect class="node fail" x="580" y="138" width="150" height="56" rx="12"/><text class="lbl" x="655" y="162">💥 fail</text><text class="sub" x="655" y="180">report + evidence</text></g>
+  <g><rect class="node lit n3" x="580" y="344" width="150" height="56" rx="12"/><text class="lbl" x="655" y="368">🧠 diagnose</text><text class="sub" x="655" y="386">free LLM reads logs</text></g>
+  <g><rect class="node lit n4" x="375" y="420" width="150" height="56" rx="12"/><text class="lbl" x="450" y="444">🩹 patch</text><text class="sub" x="450" y="462">safety-gated</text></g>
+  <g><rect class="node lit n5" x="170" y="344" width="150" height="56" rx="12"/><text class="lbl" x="245" y="368">🧪 sandbox test</text><text class="sub" x="245" y="386">heal/* branch, dry run</text></g>
+  <g><rect class="node ok" x="170" y="138" width="150" height="56" rx="12"/><text class="lbl" x="245" y="162">⚒ promote</text><text class="sub" x="245" y="180">merge → main</text></g>
+
+  <text x="450" y="500" class="sub" font-size="13">no pings for errors · it only asks before it evolves</text>
+  <text x="450" y="516" class="sub" font-size="12" fill="#3dff8a" style="fill:#3dff8a">forged by Swanix 🐸</text>
+</svg>

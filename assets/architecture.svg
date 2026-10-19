@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 330" width="1100" height="330" font-family="ui-sans-serif,system-ui,Segoe UI,Arial,sans-serif">
+  <!-- ⚒ NIXFORGE architecture — forged by Swanix 🐸 -->
+  <defs>
+    <style>
+      .box{fill:#10131c;stroke:#2a3246;stroke-width:2}
+      .t{fill:#e8ecf4;font-size:18px;font-weight:700;text-anchor:middle}
+      .s{fill:#8a93a6;font-size:12.5px;text-anchor:middle}
+      .wire{stroke:#22e1ff;stroke-opacity:.35;stroke-width:2;fill:none;stroke-dasharray:4 6;animation:flow 1.2s linear infinite}
+      .wire2{stroke:#ff3df2;stroke-opacity:.35;stroke-width:2;fill:none;stroke-dasharray:4 6;animation:flow 1.2s linear infinite reverse}
+      @keyframes flow{to{stroke-dashoffset:-20}}
+    </style>
+    <path id="p1" d="M210,120 L330,120"/><path id="p2" d="M540,120 L660,120"/><path id="p3" d="M870,120 L960,120"/>
+    <path id="p4" d="M765,160 L765,230"/>
+  </defs>
+  <rect width="1100" height="330" rx="22" fill="#07080d"/>
+
+  <path class="wire" d="M210,120 L330,120"/><path class="wire" d="M540,120 L660,120"/><path class="wire" d="M870,120 L960,120"/>
+  <path class="wire2" d="M765,160 L765,230"/><path class="wire2" d="M435,160 L435,230"/>
+
+  <circle r="5" fill="#22e1ff"><animateMotion dur="1.6s" repeatCount="indefinite"><mpath href="#p1"/></animateMotion></circle>
+  <circle r="5" fill="#22e1ff"><animateMotion dur="1.6s" begin=".5s" repeatCount="indefinite"><mpath href="#p2"/></animateMotion></circle>
+  <circle r="5" fill="#ffb347"><animateMotion dur="1.6s" begin="1s" repeatCount="indefinite"><mpath href="#p3"/></animateMotion></circle>
+  <circle r="5" fill="#ff3df2"><animateMotion dur="1.6s" begin=".8s" repeatCount="indefinite"><mpath href="#p4"/></animateMotion></circle>
+
+  <g><rect class="box" x="30" y="80" width="180" height="80" rx="14"/><text class="t" x="120" y="114">📱 You</text><text class="s" x="120" y="136">plain words on Telegram</text></g>
+  <g><rect class="box" x="330" y="80" width="210" height="80" rx="14"/><text class="t" x="435" y="114">☁️ Worker</text><text class="s" x="435" y="136">Jarvis-style bot + dashboard</text></g>
+  <g><rect class="box" x="660" y="80" width="210" height="80" rx="14"/><text class="t" x="765" y="114">⚙️ GitHub Actions</text><text class="s" x="765" y="136">plan · run · heal · evolve</text></g>
+  <g><rect class="box" x="960" y="80" width="110" height="80" rx="14"/><text class="t" x="1015" y="114">🌍</text><text class="s" x="1015" y="136">web, feeds, files</text></g>
+  <g><rect class="box" x="330" y="230" width="210" height="70" rx="14"/><text class="t" x="435" y="261">🧠 free brains</text><text class="s" x="435" y="282">Gemini → Groq → OpenRouter</text></g>
+  <g><rect class="box" x="660" y="230" width="210" height="70" rx="14"/><text class="t" x="765" y="261">📜 git = memory</text><text class="s" x="765" y="282">specs, state, heal history</text></g>
+  <text x="1070" y="318" text-anchor="end" font-size="12" fill="#3dff8a">forged by Swanix 🐸</text>
+</svg>

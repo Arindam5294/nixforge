@@ -1,0 +1,31 @@
+# ⚒ NIXFORGE · evolution — pitch weekly, build only after Swanix approves 🐸
+name: "🧬 evolve"
+on:
+  schedule:
+    - cron: "30 3 * * 0"          # Sunday 09:00 IST: weekly self-review → maybe a pitch
+  workflow_dispatch:
+    inputs:
+      pid: { description: "approved proposal id to build (blank = review)", required: false, default: "" }
+permissions: { contents: write }
+concurrency: { group: nixforge-state, cancel-in-progress: false }
+env:
+  NIXFORGE_QUIET: "1"
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
+  GEMINI_API_KEY:     ${{ secrets.GEMINI_API_KEY }}
+  GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - name: "🧬 review or build"
+        run: |
+          if [ -n "${{ inputs.pid }}" ]; then python -m forge.evolve build "${{ inputs.pid }}"; else python -m forge.evolve review; fi
+      - run: |
+          bash scripts/commit.sh "🧬 evolve: ${{ inputs.pid || 'weekly review' }}"
