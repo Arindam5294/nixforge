@@ -1,5 +1,9 @@
 # ⚒ NIXFORGE changelog
 
+## v0.4.1 — brains back
+- Gemini walks a list of live models (2.0-flash was retired → 2.5-flash).
+- Groq/OpenRouter retry without JSON mode and fall back to smaller models on 400; errors show the API reason.
+
 ## v0.1 · 2026-10-19
 - first forge: planner, runner, healer, evolution pitches, Telegram bot, dashboard
 - heal demo verified live on GitHub Actions: h2.page-title broke, healed to h1.forge-title, promoted

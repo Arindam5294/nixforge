@@ -16,35 +16,52 @@ TIMEOUT = 60
 
 def _gemini(prompt: str, system: str) -> str:
     key = os.environ["GEMINI_API_KEY"]
-    model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
-    r = requests.post(
-        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-        headers={"x-goog-api-key": key},
-        json={
-            "systemInstruction": {"parts": [{"text": system}]},
-            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0.2},
-        },
-        timeout=TIMEOUT,
-    )
-    r.raise_for_status()
-    return r.json()["candidates"][0]["content"]["parts"][0]["text"]
+    models = [m for m in (os.environ.get("GEMINI_MODEL"), "gemini-2.5-flash",
+                          "gemini-flash-latest", "gemini-2.5-flash-lite") if m]
+    last = ""
+    for model in dict.fromkeys(models):  # v0.4.1: Google retires models; walk the list
+        r = requests.post(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+            headers={"x-goog-api-key": key},
+            json={
+                "systemInstruction": {"parts": [{"text": system}]},
+                "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                "generationConfig": {"temperature": 0.2},
+            },
+            timeout=TIMEOUT,
+        )
+        if r.status_code == 404:
+            last = f"{model} 404"
+            continue
+        if not r.ok:
+            raise RuntimeError(f"{model} {r.status_code}: {r.text[:200]}")
+        return r.json()["candidates"][0]["content"]["parts"][0]["text"]
+    raise RuntimeError(f"no live gemini model ({last})")
 
 
-def _openai_style(url: str, key: str, model: str, prompt: str, system: str) -> str:
-    r = requests.post(
-        url,
-        headers={"Authorization": f"Bearer {key}", "X-Title": "NIXFORGE by Swanix"},
-        json={
-            "model": model,
-            "temperature": 0.2,
-            "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-            **({"response_format": {"type": "json_object"}} if "ONE JSON object" in prompt else {}),
-        },
-        timeout=TIMEOUT,
-    )
-    r.raise_for_status()
-    return r.json()["choices"][0]["message"]["content"]
+def _openai_style(url: str, key: str, model: str, prompt: str, system: str, fallbacks: tuple = ()) -> str:
+    models = list(dict.fromkeys([model, *fallbacks]))
+    json_mode = "ONE JSON object" in prompt
+    last = ""
+    for m in models:
+        for strict in ([True, False] if json_mode else [False]):
+            r = requests.post(
+                url,
+                headers={"Authorization": f"Bearer {key}", "X-Title": "NIXFORGE by Swanix"},
+                json={
+                    "model": m,
+                    "temperature": 0.2,
+                    "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+                    **({"response_format": {"type": "json_object"}} if strict else {}),
+                },
+                timeout=TIMEOUT,
+            )
+            if r.ok:
+                return r.json()["choices"][0]["message"]["content"]
+            last = f"{m} {r.status_code}: {r.text[:200]}"
+            if r.status_code in (401, 403, 429):
+                raise RuntimeError(last)
+    raise RuntimeError(last)
 
 
 def _groq(prompt: str, system: str) -> str:
@@ -52,7 +69,7 @@ def _groq(prompt: str, system: str) -> str:
         "https://api.groq.com/openai/v1/chat/completions",
         os.environ["GROQ_API_KEY"],
         os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b"),
-        prompt, system,
+        prompt, system, ("openai/gpt-oss-20b", "llama-3.1-8b-instant"),
     )
 
 
@@ -60,8 +77,8 @@ def _openrouter(prompt: str, system: str) -> str:
     return _openai_style(
         "https://openrouter.ai/api/v1/chat/completions",
         os.environ["OPENROUTER_API_KEY"],
-        os.environ.get("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free"),
-        prompt, system,
+        os.environ.get("OPENROUTER_MODEL", "openai/gpt-oss-20b:free"),
+        prompt, system, ("meta-llama/llama-3.3-70b-instruct:free",),
     )
 
 
