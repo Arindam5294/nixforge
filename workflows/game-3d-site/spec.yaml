@@ -1,7 +1,7 @@
 # ⚒ NIXFORGE workflow — forged by Swanix 🐸
 id: game_3d_site
 title: Generate 3D game website
-status: pending
+status: active
 tz: Asia/Kolkata
 steps:
 - id: site
