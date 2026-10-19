@@ -1,0 +1,31 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: gate_notice_watch
+title: Watch the GATE notices page
+schedule: '*/30 * * * *'
+tz: Asia/Kolkata
+status: pending
+steps:
+- id: page
+  use: fetch
+  with:
+    url: https://example.com/notices
+- id: latest
+  use: select
+  with:
+    html: '{{ page }}'
+    css: ul.notices li
+- id: watch
+  use: diff
+  with:
+    key: latest
+    value: '{{ latest }}'
+- id: ping
+  use: telegram
+  when: '{{ watch.changed }}'
+  with:
+    text: '🔔 New notice: {{ latest }}'
+tests:
+- len(latest) > 0
+request: Now try that again
+summary: Monitors the GATE notices page and sends a Telegram alert when a new notice
+  appears.
