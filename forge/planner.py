@@ -134,9 +134,43 @@ def main(argv=None) -> int:
         spec = load_spec(slug)
         note = "dry run passed (auto-fixed while forging)" if result == "healed" else f"dry run hit: {str(e)[:100]}"
     log(f"forged {slug}: {note}", "forge")
-    ask_owner(slug, spec, note)
+    # v0.4.2 (Swanix's rule): never sit silent waiting for approval. Do the job NOW,
+    # answer with the result, and keep it switched on if it has a schedule.
+    from .core import load_spec
+    from .runner import run_real
+    spec = load_spec(slug)
+    spec["status"] = "active"
+    save_spec(slug, spec)
+    ok = run_real(slug)
+    if not ok:  # heal once and retry before answering
+        try:
+            from .healer import heal
+            if heal(slug) == "healed":
+                ok = run_real(slug)
+        except Exception as e:  # noqa: BLE001
+            log(f"heal after first run failed: {e}", "err")
+    tell_owner(slug, load_spec(slug), ok)
     print(yaml.safe_dump(spec, sort_keys=False))
     return 0
+
+
+def tell_owner(slug: str, spec: dict, ok: bool) -> None:
+    token, chat = os.environ.get("TELEGRAM_BOT_TOKEN"), os.environ.get("TELEGRAM_CHAT_ID")
+    if not token or not chat:
+        return
+    title = spec.get("title", slug)
+    if ok:
+        when = (f"\n⏰ Stays on: {spec['schedule']} ({spec['tz']}). /pause {slug} to stop."
+                if spec.get("schedule") else "")
+        text = f"✅ Done: {title}\n{spec.get('summary', '')}{when}\n\n{SIGN_OFF}"
+    else:
+        from .core import REPORT_DIR, read_json
+        err = read_json(REPORT_DIR / f"{slug}.json", {}).get("error", "unknown error")
+        text = (f"⚠️ Tried {title} but it broke: {str(err)[:300]}\n"
+                f"I'll keep healing it in the background. /run {slug} to retry.\n\n{SIGN_OFF}")
+    kb = {"inline_keyboard": [[{"text": "🗑 Discard", "callback_data": f"discard:{slug}"}]]}
+    requests.post(f"https://api.telegram.org/bot{token}/sendMessage",
+                  data={"chat_id": chat, "text": text, "reply_markup": json.dumps(kb)}, timeout=30)
 
 
 if __name__ == "__main__":

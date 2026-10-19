@@ -1,5 +1,9 @@
 # ⚒ NIXFORGE changelog
 
+## v0.4.2 — answers first
+- Every request runs right away and replies with the result (no silent approval wait). Scheduled ones stay on; /pause to stop.
+- New update channel: patches/*.url files apply a patch.
+
 ## v0.4.1 — brains back
 - Gemini walks a list of live models (2.0-flash was retired → 2.5-flash).
 - Groq/OpenRouter retry without JSON mode and fall back to smaller models on 400; errors show the API reason.
