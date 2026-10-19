@@ -23,35 +23,47 @@ from .llm import chat_json
 from .runner import execute
 from .sig import SIGN_OFF, banner, log
 
-SYSTEM = """You are the NIXFORGE planner, built by Swanix. Turn the user's request
-into a workflow spec using ONLY the listed blocks. Rules:
+SYSTEM = """You are the NIXFORGE planner, built by Swanix. You turn ANY request into a
+working workflow spec. You never say "can't do it yet": if no simple block fits,
+write a `code` step (real Python 3.12) that does the whole job. Rules:
 - steps run top to bottom; reference earlier outputs as "{{ step_id }}" or
-  "{{ step_id.field }}"; use "when": "{{ step.changed }}" for conditions.
-- schedule is a 5-field cron in the given tz (Asia/Kolkata). Never more often
-  than every 15 minutes. Omit schedule for on-demand workflows.
-- telegram only ever messages the owner. There is NO way to spend money,
-  post publicly, message other people or delete data: if asked, set
-  "unsupported" to the reason and "unsupported_kind" to "forbidden".
-- if it's allowed but no block can do it yet, set "unsupported" and
-  "unsupported_kind": "missing" (NIXFORGE will pitch an evolution).
-- add 1-3 "tests": python expressions over step outputs proving it worked
-  (e.g. "len(headline) > 0").
-- if a website change watcher: fetch → select → diff → telegram when changed.
+  "{{ step_id.field }}"; "when": "{{ step.changed }}" for conditions.
+- Simple website watch / rss digest may use the small blocks. EVERYTHING else
+  (APIs, scraping, building files or websites, loops, maths, conversions,
+  reminders, multi-step logic) = ONE `code` step with id "main".
+- code: define `def run(h):` using ONLY the h helpers listed + stdlib + installed
+  libs. Write complete, defensive code (timeouts, try/except around flaky
+  parts, sensible fallbacks). Never reference env vars or secrets. Return a short
+  string or dict summarising what happened.
+- The owner wants RESULTS on Telegram: on-demand tasks end with h.notify(...)
+  carrying the actual result (text, link from h.publish, or h.send_file).
+  Watchers notify only when h.changed(...) says something is new.
+- Websites/pages/files to share: generate them (h.llm can write full HTML/JS,
+  three.js via CDN https://unpkg.com/three@0.160.0/build/three.module.js is fine)
+  and host with h.publish("index.html", html); notify the URL.
+- schedule: 5-field cron in tz Asia/Kolkata, never more often than every 15 min.
+  Omit schedule for one-off / "now" / on-demand tasks (they run right after
+  approval). Sub-15-minute timing ("every second for 5 seconds") = a loop with
+  h.sleep inside one run.
+- Telegram goes ONLY to the owner. Refuse ("unsupported") only if it would spend
+  money, message/post as the owner to other people, or delete their data.
+- add 1-2 "tests": python expressions over step outputs, e.g. "main is not None".
 """
 
 EXAMPLE = {
-    "id": "gate_notice_watch", "title": "Watch the GATE notices page", "schedule": "*/30 * * * *",
-    "tz": "Asia/Kolkata", "status": "pending",
-    "steps": [
-        {"id": "page", "use": "fetch", "with": {"url": "https://example.com/notices"}},
-        {"id": "latest", "use": "select", "with": {"html": "{{ page }}", "css": "ul.notices li"}},
-        {"id": "watch", "use": "diff", "with": {"key": "latest", "value": "{{ latest }}"}},
-        {"id": "ping", "use": "telegram", "when": "{{ watch.changed }}",
-         "with": {"text": "🔔 New notice: {{ latest }}"}},
-    ],
-    "tests": ["len(latest) > 0"],
+    "id": "game_3d_site", "title": "3D game website", "tz": "Asia/Kolkata", "status": "pending",
+    "steps": [{"id": "main", "use": "code", "with": {"source": (
+        "def run(h):\n"
+        "    html = h.llm('Write ONE complete self-contained index.html: a playable 3D browser game '\n"
+        "                 'using three.js as an ES module from https://unpkg.com/three@0.160.0/build/three.module.js. '\n"
+        "                 'Keyboard + touch controls, score, restart. Return ONLY the HTML.')\n"
+        "    start = html.find('<!'); html = html[start:] if start >= 0 else html\n"
+        "    html = html.split('```')[0]\n"
+        "    url = h.publish('index.html', html)\n"
+        "    h.notify('🕹 Your 3D game site is live: ' + url)\n"
+        "    return url\n")}}],
+    "tests": ["str(main).startswith('http')"],
 }
-
 
 def slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:40] or "workflow"
@@ -59,21 +71,13 @@ def slugify(text: str) -> str:
 
 def plan(request: str) -> tuple[str, dict]:
     ans = chat_json(
-        f"BLOCKS:\n{catalog()}\n\nEXAMPLE SPEC:\n{json.dumps(EXAMPLE)}\n\nREQUEST: {request}\n\n"
+        f"BLOCKS:\n{catalog()}\n\nEXAMPLE SPEC (code step):\n{json.dumps(EXAMPLE)}\n\nREQUEST: {request}\n\n"
         'Return {"spec": {...}, "summary": "<2 short lines a non-coder understands>", '
-        '"unsupported": null, "unsupported_kind": null}',
+        '"unsupported": null}',
         SYSTEM,
     )
     if ans.get("unsupported"):
-        if ans.get("unsupported_kind") == "missing":
-            from .core import STATE_DIR, read_json, write_json
-            from .evolve import propose
-            misses = read_json(STATE_DIR / "_unsupported.json", [])
-            misses.append({"request": request, "why": ans["unsupported"]})
-            write_json(STATE_DIR / "_unsupported.json", misses[-50:])
-            propose(f"request I couldn't do yet: {request}", ans["unsupported"])
-            raise safety.SafetyError(f"I can't do that yet ({ans['unsupported']}). I've pitched you an upgrade.")
-        raise safety.SafetyError(f"can't do that: {ans['unsupported']}")
+        raise safety.SafetyError(f"I won't do that one: {ans['unsupported']}")
     spec = ans["spec"]
     spec["status"] = "pending"
     spec.setdefault("tz", "Asia/Kolkata")
@@ -94,7 +98,7 @@ def ask_owner(slug: str, spec: dict, dry_note: str) -> None:
     when = f"⏰ {spec['schedule']} ({spec['tz']})" if spec.get("schedule") else "▶️ on demand"
     steps = " → ".join(s["use"] for s in spec["steps"])
     text = (f"⚒ Forged: {spec.get('title', slug)}\n{spec.get('summary', '')}\n\n{when}\n🔗 {steps}\n"
-            f"🧪 {dry_note}\n\nApprove to switch it on.\n\n{SIGN_OFF}")
+            f"🧪 {dry_note}\n\n{'Approve and it runs right away.' if not spec.get('schedule') else 'Approve to switch it on (first run right away).'}\n\n{SIGN_OFF}")
     kb = {"inline_keyboard": [[{"text": "✅ Approve", "callback_data": f"approve:{slug}"},
                                {"text": "🗑 Discard", "callback_data": f"discard:{slug}"}]]}
     requests.post(f"https://api.telegram.org/bot{token}/sendMessage",

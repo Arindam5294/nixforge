@@ -1,8 +1,0 @@
-{
-  "wf": "gate-notice-watch",
-  "step": "latest",
-  "error": "selector 'ul.notices li' matched nothing",
-  "hint": "PAGE OUTLINE:\n",
-  "inputs": {},
-  "at": "2026-10-19T19:05:40.763263+00:00"
-}

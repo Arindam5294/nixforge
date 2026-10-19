@@ -146,6 +146,8 @@ def main(argv=None) -> int:
     r.add_argument("--dry", action="store_true")
     r.add_argument("--input", action="append", default=[])
     sub.add_parser("due")
+    c = sub.add_parser("changed")  # push trigger: run specs that were just approved/resumed
+    c.add_argument("files", nargs="*")
     a = ap.parse_args(argv)
 
     if a.cmd == "run":
@@ -155,6 +157,13 @@ def main(argv=None) -> int:
             log("dry run passed", "ok")
             return 0
         emit_failed([] if run_real(a.wf, inputs) else [a.wf])
+        return 0
+    if a.cmd == "changed":
+        ids = sorted({f.split("/")[1] for f in a.files if f.startswith("workflows/") and f.endswith("spec.yaml")})
+        ids = [i for i in ids if wf_path(i).exists() and load_spec(i).get("status", "active") == "active"]
+        log(f"just switched on: {ids or 'nothing'}", "forge")
+        failed = [wf for wf in ids if not run_real(wf)]
+        emit_failed(failed)
         return 0
     failed = [wf for wf in due() if not run_real(wf)]
     emit_failed(failed)

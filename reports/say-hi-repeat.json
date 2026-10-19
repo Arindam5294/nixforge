@@ -1,8 +1,0 @@
-{
-  "wf": "say-hi-repeat",
-  "step": "ping",
-  "error": "AttributeError: 'dict' object has no attribute 'run_block'",
-  "hint": "",
-  "inputs": {},
-  "at": "2026-10-19T19:09:01.081001+00:00"
-}

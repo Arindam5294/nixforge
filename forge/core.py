@@ -33,10 +33,22 @@ def load_spec(wf_id: str) -> dict:
     return yaml.safe_load(wf_path(wf_id).read_text())
 
 
+class _Dumper(yaml.SafeDumper):
+    pass
+
+
+def _str(dumper, data):
+    style = "|" if "\n" in data else None
+    return dumper.represent_scalar("tag:yaml.org,2002:str", data.rstrip() + "\n" if style else data, style=style)
+
+
+_Dumper.add_representer(str, _str)
+
+
 def save_spec(wf_id: str, spec: dict) -> None:
     p = wf_path(wf_id)
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text("# ⚒ NIXFORGE workflow — forged by Swanix 🐸\n" + yaml.safe_dump(spec, sort_keys=False, allow_unicode=True))
+    p.write_text("# ⚒ NIXFORGE workflow — forged by Swanix 🐸\n" + yaml.dump(spec, Dumper=_Dumper, sort_keys=False, allow_unicode=True, width=1000))
 
 
 def all_workflows() -> list[str]:

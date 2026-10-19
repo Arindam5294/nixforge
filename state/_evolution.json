@@ -9,10 +9,11 @@
       "risk": "May be misused for spamming if not rate‑limited",
       "block_name": "repeat",
       "block_doc": "repeat(action, interval_seconds, count) -> executes the given side‑effect action repeatedly",
-      "status": "shipped",
+      "status": "retired",
       "source": "request I couldn't do yet: Let's suppose say me hi every 1 second for next 5 seconds",
       "at": "2026-10-19T19:04:24+00:00",
-      "version": "0.2"
+      "version": "0.2",
+      "note": "replaced by the universal code block in v0.4"
     },
     "E2": {
       "worth_it": true,
@@ -22,10 +23,11 @@
       "risk": "Potentially heavy compute and storage usage.",
       "block_name": "threejs_build",
       "block_doc": "threejs_build(template_url:str, assets:list, config:dict=None) -> str # returns URL of generated 3D site",
-      "status": "shipped",
+      "status": "retired",
       "source": "request I couldn't do yet: Can you build a 3d website for me ?",
       "at": "2026-10-19T19:10:58+00:00",
-      "version": "0.3"
+      "version": "0.3",
+      "note": "replaced by the universal code block in v0.4"
     }
   }
 }

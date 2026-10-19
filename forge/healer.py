@@ -40,6 +40,9 @@ Fix it by changing ONLY how steps work: selectors, URLs on the same site, parsin
 arguments, templates, tests that were wrong. NEVER add, remove or retarget
 side-effect steps (telegram, convert), never change schedule/tz/status, never
 put secrets in the spec. Prefer the smallest change that makes the tests pass.
+For a `code` step: read the TRACEBACK and SOURCE, then return the step with a
+corrected `with.source` (still `def run(h):`, same notify behaviour). Rewrite
+freely: different URLs/APIs, parsing, fallbacks — whatever makes it work.
 If the cause is outside our control (site gone, auth, quota), say fixable=false."""
 
 
@@ -129,7 +132,8 @@ def heal(wf_id: str) -> str:
                   'Return {"diagnosis": "<one sentence>", "fixable": true|false, '
                   '"spec": <full patched spec as a JSON object>, "files": {"step_x.py": "<full code>"} }\n'
                   "Custom code is optional: only via the python block, files MUST be named step_<name>.py, "
-                  "define run(ctx, **args), and may use requests.get + bs4 only. Prefer fixing block args.")
+                  "define run(ctx, **args), and may use requests.get + bs4 only. Prefer fixing block args. "
+                  "For a failing `code` step, just fix its with.source in the spec.")
         try:
             ans = chat_json(prompt, SYSTEM)
         except Exception as e:  # noqa: BLE001

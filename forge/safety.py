@@ -38,6 +38,8 @@ def check_spec(spec: dict) -> None:
         seen.add(sid)
         if use not in REGISTRY:
             raise SafetyError(f"unknown block '{use}' in step '{sid}'")
+        if use == "code":
+            check_code_block((s.get("with") or {}).get("source", ""))
     if SECRET_RE.search(str(spec)):
         raise SafetyError("a secret-looking value is inside the spec; secrets belong in GitHub/Cloudflare secrets")
 
@@ -46,6 +48,20 @@ def check_code(code: str) -> None:
     for bad in BANNED_CODE:
         if bad in code:
             raise SafetyError(f"custom code uses a banned call: {bad}")
+
+
+CODE_BANNED = ["os.environ", "os.getenv", "environ[", "rmtree", "smtplib", ".git/", "GITHUB_TOKEN",
+               "TELEGRAM_BOT_TOKEN", "API_KEY", "shutdown", "os.kill", "fork("]
+
+
+def check_code_block(code: str) -> None:
+    """The code block runs on the owner's own throwaway Actions runner, so it may
+    use the network and subprocesses; it may NOT read secrets or wipe files."""
+    if not isinstance(code, str) or "def run" not in code:
+        raise SafetyError("code step needs a `def run(h):` function")
+    for bad in CODE_BANNED:
+        if bad in code:
+            raise SafetyError(f"code step uses a banned thing: {bad}")
 
 
 def side_effects(spec: dict) -> list:

@@ -8,6 +8,7 @@ Each block declares whether it has side effects. In a dry run (the healer's
 sandbox) side-effect blocks never fire. Messages only ever go to the owner.
 """
 import difflib
+import json
 import hashlib
 import os
 import shutil
@@ -205,6 +206,116 @@ def python_step(ctx, file: str, **args):
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod.run(ctx, **args)
+
+
+# ── the universal block: real Python, written by the planner, healed by the healer ──
+CODE_HELP = """code(source) -> runs `def run(h):` and returns its result. h gives you:
+  h.inputs (dict)  h.now (str)  h.prev (earlier step outputs)  h.dry (True while testing)
+  h.get(url, **kw) -> requests.Response (retries)   h.post(url, **kw) -> requests.Response
+  h.fetch(url) -> page text (falls back to a reader)  h.soup(html) -> BeautifulSoup
+  h.llm(prompt, system=None) -> text from the free LLM chain (big outputs OK)
+  h.notify(text) -> Telegram message to the OWNER     h.send_file(path, caption='')
+  h.publish(filename, content) -> public URL of a hosted file (html sites, json, txt)
+  h.changed(key, value) -> True only when value differs from last run (first run False)
+  h.state -> dict saved between runs   h.sleep(s)   h.log(msg)   h.tmp -> temp dir Path
+  any pip lib already installed: requests, bs4, feedparser, yaml, yt-dlp; ffmpeg on PATH."""
+
+
+class Helpers:
+    def __init__(self, ctx):
+        self._ctx, self.dry = ctx, bool(ctx.get("_dry"))
+        self.inputs, self.now = ctx.get("inputs", {}), ctx.get("now", "")
+        self.prev = {k: v for k, v in ctx.items() if not k.startswith("_") and k not in ("inputs", "now")}
+        self._spath = STATE_DIR / f"{ctx['_wf']}.code.json"
+        self.state = read_json(self._spath, {})
+        self.tmp = Path(tempfile.mkdtemp(prefix="nixforge-"))
+        self.sent: list = []
+
+    def get(self, url, **kw):
+        kw.setdefault("headers", UA)
+        kw.setdefault("timeout", 30)
+        return retry(lambda: requests.get(url, **kw))
+
+    def post(self, url, **kw):
+        kw.setdefault("timeout", 60)
+        return retry(lambda: requests.post(url, **kw))
+
+    def fetch(self, url):
+        return fetch(self._ctx, url)
+
+    def soup(self, html):
+        from bs4 import BeautifulSoup
+        return BeautifulSoup(html or "", "html.parser")
+
+    def llm(self, prompt, system=None):
+        from .llm import chat
+        return chat(prompt, system or "You are a precise, helpful expert. Follow the format asked exactly.")
+
+    def notify(self, text):
+        self.sent.append(str(text)[:200])
+        if self.dry:
+            log(f"[dry-run] would notify: {str(text)[:120]}")
+            return "dry"
+        return telegram(self._ctx, str(text))
+
+    def send_file(self, path, caption=""):
+        if self.dry:
+            log(f"[dry-run] would send file {path}")
+            return "dry"
+        with open(path, "rb") as f:
+            return _tg("sendDocument", caption=f"{caption}\n{SIGN_OFF}"[:1000], files={"document": f})
+
+    def publish(self, filename, content):
+        from .core import ROOT
+        repo = os.environ.get("GITHUB_REPOSITORY", "Arindam5294/nixforge")
+        name = Path(str(filename)).name or "index.html"
+        url = f"https://raw.githack.com/{repo}/main/out/{self._ctx['_wf']}/{name}"
+        if not self.dry:
+            out = ROOT / "out" / self._ctx["_wf"] / name
+            out.parent.mkdir(parents=True, exist_ok=True)
+            (out.write_bytes if isinstance(content, bytes) else out.write_text)(content)
+            self._ctx.setdefault("_published", []).append(str(out))
+        return url
+
+    def changed(self, key, value):
+        mem = self.state.setdefault("_seen", {})
+        new = value if isinstance(value, str) else json.dumps(value, sort_keys=True, default=str)
+        old = mem.get(key)
+        mem[key] = new
+        return old is not None and old != new
+
+    def sleep(self, s):
+        if not self.dry:
+            time.sleep(min(float(s), 600))
+
+    def log(self, msg):
+        log(str(msg)[:300])
+
+    def _save(self):
+        if not self.dry:
+            write_json(self._spath, self.state)
+
+
+@block("code", side_effect=True, doc=CODE_HELP)
+def code(ctx, source: str):
+    import traceback
+    from .safety import check_code_block
+    check_code_block(source)
+    h = Helpers(ctx)
+    ns: dict = {"__name__": f"nixforge_{ctx['_wf']}"}
+    try:
+        exec(compile(source, f"<{ctx['_wf']}>", "exec"), ns)  # noqa: S102 — owner-approved code on his own runner
+        if "run" not in ns:
+            raise StepError("code must define run(h)")
+        result = ns["run"](h)
+    except StepError:
+        raise
+    except Exception as e:  # noqa: BLE001
+        numbered = "\n".join(f"{i + 1:3} {ln}" for i, ln in enumerate(source.splitlines()))
+        raise StepError(f"{type(e).__name__}: {e}",
+                        hint=f"TRACEBACK:\n{traceback.format_exc()[-2500:]}\n\nSOURCE:\n{numbered[:3500]}") from e
+    h._save()
+    return result if result is not None else "done"
 
 
 def catalog() -> str:
