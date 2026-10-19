@@ -2,136 +2,148 @@
 <html lang="en">
 <head>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
-<meta charset="UTF-8">
-<title>TrendWave – Eco‑Friendly Fashion</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 
+<meta charset="UTF-8">
+<title>TrendWave – Eco‑Friendly Apparel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --clr-bg:#f5fbff;
-  --clr-primary:#88d8c0;
-  --clr-accent:#ff6f61;
-  --clr-dark:#333;
-  --font-display:'Poppins',sans-serif;
-  --font-body:'Inter',sans-serif;
-  --gap:1.5rem;
+  --teal:#6ec5c5;
+  --coral:#ff6b6b;
+  --charcoal:#333333;
+  --bg:#f9fbfd;
+  --white:#ffffff;
+  --shadow:0 4px 12px rgba(0,0,0,0.08);
+  --radius:8px;
+  --transition:.3s ease;
+  --max-width:1200px;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;font-family:var(--font-body);}
-body{background:var(--clr-bg);color:var(--clr-dark);}
-h1,h2{font-family:var(--font-display);font-weight:700;color:var(--clr-dark);}
-h1{font-size:2rem;}
-h2{font-size:1.5rem;margin-bottom:var(--gap);}
-p{line-height:1.5;margin-bottom:var(--gap);}
-a{color:inherit;text-decoration:none;}
-section{padding:calc(var(--gap)*2) var(--gap);opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s;}
-section.show{opacity:1;transform:none;}
-nav{
-  position:sticky;top:0;background:#fff;display:flex;justify-content:space-between;align-items:center;padding:var(--gap);
-  box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:10;
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--charcoal);
+  line-height:1.6;
 }
-nav a{margin:0 .5rem;font-weight:500;}
-nav a:hover{color:var(--clr-primary);}
-button{
-  background:var(--clr-primary);color:#fff;border:none;padding:.75rem 1.5rem;border-radius:4px;
-  font-family:var(--font-display);font-size:1rem;cursor:pointer;transition:transform .2s;
+h1,h2{font-family:'Poppins',sans-serif; font-weight:700}
+h1{font-size:2.2rem}
+h2{font-size:1.8rem;margin-bottom:.5rem}
+section{padding:2rem 1rem;max-width:var(--max-width);margin:auto;opacity:0;transform:translateY(30px);transition:opacity .6s var(--transition),transform .6s var(--transition)}
+section.visible{opacity:1;transform:none}
+.container{display:flex;flex-direction:column;gap:1.5rem}
+.btn{
+  display:inline-block;padding:.75rem 1.5rem;background:var(--coral);
+  color:var(--white);border:none;border-radius:var(--radius);
+  font-weight:500;cursor:pointer;transition:background var(--transition);
 }
-button:active{transform:scale(.95);}
-.container{max-width:960px;margin:auto;}
-#stage{width:100%;height:100%;display:block;}
-.stage-wrapper{height:70vh;overflow:hidden;}
-/* Catalog cards */
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:var(--gap);}
+.btn:hover{background:#e05555}
+header{position:relative;overflow:hidden}
+#hero{height:70vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(135deg,var(--teal) 0%,#e0f7fa 100%);color:var(--charcoal)}
+#hero h1{font-size:2.5rem;margin-bottom:.5rem}
+#hero p{font-size:1rem;margin-bottom:1rem}
+#hero .cta{margin-top:1rem}
+#stage{width:100%;height:100%;display:block}
+.swatches{
+  position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);
+  display:flex;gap:.5rem;background:rgba(255,255,255,.8);padding:.5rem .8rem;
+  border-radius:var(--radius);box-shadow:var(--shadow);
+}
+.swatch{
+  width:28px;height:28px;border-radius:50%;border:2px solid var(--charcoal);
+  cursor:pointer;transition:transform var(--transition);
+}
+.swatch:hover{transform:scale(1.1)}
+.swatch[data-color="#6ec5c5"]{background:#6ec5c5}
+.swatch[data-color="#ff6b6b"]{background:#ff6b6b}
+.swatch[data-color="#ffb347"]{background:#ffb347}
+.swatch[data-color="#ffffff"]{background:#fff}
 .card{
-  background:#fff;padding:var(--gap);border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);
-  text-align:center;transition:transform .3s;
+  background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:1rem;text-align:center;transition:transform var(--transition);
 }
-.card:hover{transform:translateY(-4px);}
-.card canvas{width:100%;height:80px;}
-/* Game */
-#gameCanvas{background:#fff;border:2px solid var(--clr-primary);border-radius:8px;display:block;margin:auto;}
-#score{font-size:1.2rem;margin:1rem 0;text-align:center;}
+.card:hover{transform:translateY(-4px)}
+.card img{max-width:100%;height:auto;border-radius:var(--radius)}
+footer{
+  background:var(--charcoal);color:var(--white);padding:2rem 1rem;text-align:center;
+  font-size:.9rem;
+}
+footer a{color:var(--teal);text-decoration:none}
+footer a:hover{text-decoration:underline}
 @media(min-width:600px){
-  h1{font-size:2.5rem;}
+  h1{font-size:3rem}
+  #hero h1{font-size:3.2rem}
+  .container{flex-direction:row;flex-wrap:wrap}
+  .card{flex:1 1 calc(33% - 2rem);margin:1rem}
 }
 </style>
+
 </head>
 <body>
-<nav>
-  <div><strong>TrendWave</strong></div>
-  <div>
-    <a href="#home">Home</a>
-    <a href="#catalog">Catalog</a>
-    <a href="#about">About</a>
-    <a href="#contact">Contact</a>
-    <a href="#game">Play</a>
-  </div>
-</nav>
 
-<section id="home" class="show">
+<header id="hero">
   <div class="container">
-    <h1>Ride the Wave of Sustainable Style</h1>
-    <p>Discover eco‑friendly fashion that moves with you. Our virtual boutique lets you explore every stitch in 3D.</p>
-    <div class="stage-wrapper"><canvas id="stage"></canvas></div>
+    <h1>TrendWave</h1>
+    <p>Eco‑friendly fashion that rides the wave of style.</p>
+    <button class="btn cta">Shop the Collection</button>
   </div>
-</section>
+  <canvas id="stage"></canvas>
+  <div class="swatches" aria-label="T‑shirt colour selector">
+    <div class="swatch" data-color="#6ec5c5" title="Teal"></div>
+    <div class="swatch" data-color="#ff6b6b" title="Coral"></div>
+    <div class="swatch" data-color="#ffb347" title="Sunset"></div>
+    <div class="swatch" data-color="#ffffff" title="White"></div>
+  </div>
+</header>
 
 <section id="catalog">
+  <h2>Featured Collection</h2>
   <div class="container">
-    <h2>Our Collection</h2>
-    <div class="grid">
-      <div class="card">
-        <canvas class="mini" data-type="tshirt"></canvas>
-        <p>Organic Tee</p><p>$29</p>
-      </div>
-      <div class="card">
-        <canvas class="mini" data-type="dress"></canvas>
-        <p>Recycled Dress</p><p>$79</p>
-      </div>
-      <div class="card">
-        <canvas class="mini" data-type="jacket"></canvas>
-        <p>Hemp Jacket</p><p>$119</p>
-      </div>
+    <div class="card">
+      <img src="data:image/svg+xml,%3Csvg%20width%3D'300'%20height%3D'300'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Crect%20width%3D'300'%20height%3D'300'%20fill'%3D'%236ec5c5'/%3E%3Ctext%20x%3D'50%25'%20y%3D'50%25'%20dominant-baseline%3D'middle'%20text-anchor%3D'middle'%20font-size%3D'48'%20fill%3D'%23fff'%3E👕%3C/text%3E%3C/svg%3E" alt="Eco Tee">
+      <h3>Eco Tee</h3>
+      <p>₹1,299</p>
+    </div>
+    <div class="card">
+      <img src="data:image/svg+xml,%3Csvg%20width%3D'300'%20height%3D'300'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Crect%20width%3D'300'%20height%3D'300'%20fill'%3D'%23ff6b6b'/%3E%3Ctext%20x%3D'50%25'%20y%3D'50%25'%20dominant-baseline%3D'middle'%20text-anchor%3D'middle'%20font-size%3D'48'%20fill%3D'%23fff'%3E👚%3C/text%3E%3C/svg%3E" alt="Recycled Hoodie">
+      <h3>Recycled Hoodie</h3>
+      <p>₹2,499</p>
+    </div>
+    <div class="card">
+      <img src="data:image/svg+xml,%3Csvg%20width%3D'300'%20height%3D'300'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Crect%20width%3D'300'%20height%3D'300'%20fill'%3D'%23ffb347'/%3E%3Ctext%20x%3D'50%25'%20y%3D'50%25'%20dominant-baseline%3D'middle'%20text-anchor%3D'middle'%20font-size%3D'48'%20fill%3D'%23fff'%3E🧢%3C/text%3E%3C/svg%3E" alt="Bamboo Cap">
+      <h3>Bamboo Cap</h3>
+      <p>₹799</p>
     </div>
   </div>
 </section>
 
 <section id="about">
-  <div class="container">
-    <h2>Our Story</h2>
-    <p>Founded in 2022, TrendWave blends cutting‑edge design with responsibly sourced fabrics. Every piece is crafted to reduce waste while keeping you on trend.</p>
-    <p>Join the movement—fashion that feels good and does good.</p>
-  </div>
+  <h2>Our Story</h2>
+  <p>Founded in 2022, TrendWave blends cutting‑edge design with sustainable practices. Every garment is crafted from organic cotton, recycled fibers, or biodegradable blends, ensuring you look good while caring for the planet.</p>
 </section>
 
 <section id="contact">
-  <div class="container">
-    <h2>Get in Touch</h2>
-    <p>Have questions? Want to collaborate? Drop us a line.</p>
-    <p><strong>Email:</strong> hello@trendwave.com</p>
-    <p><strong>Instagram:</strong> @trendwave_fashion</p>
-  </div>
+  <h2>Get in Touch</h2>
+  <form class="container" style="max-width:400px">
+    <input type="text" placeholder="Name" required style="padding:.75rem;border:1px solid #ccc;border-radius:var(--radius)">
+    <input type="email" placeholder="Email" required style="padding:.75rem;border:1px solid #ccc;border-radius:var(--radius)">
+    <textarea placeholder="Message" rows="4" required style="padding:.75rem;border:1px solid #ccc;border-radius:var(--radius)"></textarea>
+    <button type="submit" class="btn">Send</button>
+  </form>
 </section>
 
-<section id="game">
-  <div class="container">
-    <h2>Wave Catch</h2>
-    <p>Tap the floating waves before they fade. Score as high as you can!</p>
-    <div id="score">Score: 0</div>
-    <canvas id="gameCanvas" width="300" height="400"></canvas>
-    <button id="restartBtn" style="margin-top:1rem;display:none;">Play Again</button>
-  </div>
-</section>
+<footer>
+  <p>&copy; 2024 TrendWave. All rights reserved.</p>
+  <p><a href="#hero">Back to top</a></p>
+</footer>
 
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// ---------- 3D SHOWROOM ----------
 const canvas = document.getElementById('stage');
 const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
@@ -145,86 +157,48 @@ scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnviron
 const camera = new THREE.PerspectiveCamera(40,1,0.1,100);
 camera.position.set(0,1.2,5);
 
-const controls = new OrbitControls(camera,canvas);
+const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.autoRotate = true;
 controls.target.set(0,0.8,0);
 
-// Lights
 scene.add(new THREE.HemisphereLight(0xffffff,0x222233,1.2));
 const key = new THREE.DirectionalLight(0xffffff,2.5);
 key.position.set(3,5,4);
 key.castShadow = true;
 scene.add(key);
 
-// FLOOR
+// floor
 const floorGeo = new THREE.PlaneGeometry(10,10);
-const floorMat = new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.8});
+const floorMat = new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.9});
 const floor = new THREE.Mesh(floorGeo,floorMat);
 floor.rotation.x = -Math.PI/2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-// PODIUM
-const podiumGeo = new THREE.CylinderGeometry(0.8,0.8,0.2,32);
-const podiumMat = new THREE.MeshStandardMaterial({color:0xeeeeee});
-const podium = new THREE.Mesh(podiumGeo,podiumMat);
-podium.position.y = 0.1;
-podium.castShadow = true;
-podium.receiveShadow = true;
-scene.add(podium);
-
-// MANNEQUIN (simple)
-function createMannequin(){
-  const group = new THREE.Group();
-
-  // torso
-  const torsoGeo = new THREE.CylinderGeometry(0.25,0.25,0.6,32);
-  const torsoMat = new THREE.MeshStandardMaterial({color:0xdddddd});
-  const torso = new THREE.Mesh(torsoGeo,torsoMat);
-  torso.position.y = 0.8;
-  torso.castShadow = true;
-  group.add(torso);
-
-  // head
-  const headGeo = new THREE.SphereGeometry(0.18,32,32);
-  const head = new THREE.Mesh(headGeo,torsoMat);
-  head.position.y = 1.25;
-  head.castShadow = true;
-  group.add(head);
-
-  // legs
-  const legGeo = new THREE.CylinderGeometry(0.09,0.09,0.7,32);
-  const leftLeg = new THREE.Mesh(legGeo,torsoMat);
-  leftLeg.position.set(-0.12,0.35,0);
-  leftLeg.castShadow = true;
-  const rightLeg = leftLeg.clone();
-  rightLeg.position.x = 0.12;
-  group.add(leftLeg,rightLeg);
-
-  // simple dress (extrude)
-  const shape = new THREE.Shape();
-  shape.moveTo(-0.3,0);
-  shape.lineTo(0.3,0);
-  shape.lineTo(0.2,0.6);
-  shape.lineTo(-0.2,0.6);
-  shape.closePath();
-  const extrude = new THREE.ExtrudeGeometry(shape,{depth:0.02,bevelEnabled:false});
-  const dressMat = new THREE.MeshStandardMaterial({color:0xff6f61});
-  const dress = new THREE.Mesh(extrude,dressMat);
-  dress.rotation.x = -Math.PI/2;
-  dress.position.set(0,0.8,0.02);
-  dress.castShadow = true;
-  group.add(dress);
-
-  return group;
-}
-scene.add(createMannequin());
+// Load t‑shirt model
+let shirtMeshes = [];
+new GLTFLoader().load('https://cdn.jsdelivr.net/gh/Starklord17/threejs-t-shirt@main/public/shirt_baked.glb', gltf=>{
+  const model = gltf.scene;
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3()).length();
+  const center = box.getCenter(new THREE.Vector3());
+  model.position.sub(center); // center
+  model.scale.setScalar(2.2/size);
+  model.position.y += 0.9;
+  model.traverse(o=>{
+    if(o.isMesh){
+      o.castShadow = true;
+      o.material = o.material.clone(); // avoid sharing
+      shirtMeshes.push(o);
+    }
+  });
+  scene.add(model);
+});
 
 // Resize handling
 function resize(){
-  const w = canvas.clientWidth;
-  const h = canvas.clientHeight;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
   renderer.setSize(w,h,false);
   camera.aspect = w/h;
   camera.updateProjectionMatrix();
@@ -232,130 +206,43 @@ function resize(){
 addEventListener('resize',resize);
 resize();
 
-renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera);});
+// Animation loop
+renderer.setAnimationLoop(()=>{ controls.update(); renderer.render(scene,camera); });
 
-// ---------- REVEAL ANIMATIONS ----------
-const observer = new IntersectionObserver((entries)=> {
-  entries.forEach(entry=> {
-    if(entry.isIntersecting) entry.target.classList.add('show');
+// Colour swatches
+document.querySelectorAll('.swatch').forEach(btn=>{
+  btn.addEventListener('click',()=> {
+    const hex = btn.dataset.color;
+    shirtMeshes.forEach(m=> {
+      if(m.material && m.material.color){
+        m.material.color.set(hex);
+        // If material has map (baked texture), keep it but tint
+        m.material.needsUpdate = true;
+      }
+    });
+  });
+});
+</script>
+
+<script>
+// IntersectionObserver for reveal animations
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
   });
 },{threshold:0.1});
-document.querySelectorAll('section').forEach(s=>observer.observe(s));
 
-// ---------- MINI 3D CANVASES IN CATALOG ----------
-function miniScene(canvas, type){
-  const r = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
-  r.setPixelRatio(Math.min(devicePixelRatio,2));
-  r.setSize(canvas.clientWidth,canvas.clientHeight);
-  const sc = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(45,1,0.1,10);
-  cam.position.set(0,1,2);
-  const ctrl = new OrbitControls(cam,canvas);
-  ctrl.enableZoom = false;
-  ctrl.enablePan = false;
-  ctrl.autoRotate = true;
-  ctrl.autoRotateSpeed = 2;
-  const light = new THREE.HemisphereLight(0xffffff,0x444444,1);
-  sc.add(light);
-  const dir = new THREE.DirectionalLight(0xffffff,0.8);
-  dir.position.set(2,4,3);
-  sc.add(dir);
-  // simple geometry per type
-  let mesh;
-  if(type==='tshirt'){
-    const geo = new THREE.BoxGeometry(0.6,0.8,0.02);
-    const mat = new THREE.MeshStandardMaterial({color:0x88d8c0});
-    mesh = new THREE.Mesh(geo,mat);
-    mesh.position.y = 0.4;
-  }else if(type==='dress'){
-    const shape = new THREE.Shape();
-    shape.moveTo(-0.3,0);
-    shape.lineTo(0.3,0);
-    shape.lineTo(0.2,0.6);
-    shape.lineTo(-0.2,0.6);
-    shape.closePath();
-    const geo = new THREE.ExtrudeGeometry(shape,{depth:0.02,bevelEnabled:false});
-    const mat = new THREE.MeshStandardMaterial({color:0xff6f61});
-    mesh = new THREE.Mesh(geo,mat);
-    mesh.rotation.x = -Math.PI/2;
-    mesh.position.y = 0.6;
-  }else{ // jacket
-    const geo = new THREE.BoxGeometry(0.6,0.9,0.02);
-    const mat = new THREE.MeshStandardMaterial({color:0x333333});
-    mesh = new THREE.Mesh(geo,mat);
-    mesh.position.y = 0.45;
-  }
-  sc.add(mesh);
-  function animate(){requestAnimationFrame(animate);ctrl.update();r.render(sc,cam);}
-  animate();
-}
-document.querySelectorAll('.mini').forEach(c=>miniScene(c,c.dataset.type));
-
-// ---------- SIMPLE GAME ----------
-const gameCanvas = document.getElementById('gameCanvas');
-const ctx = gameCanvas.getContext('2d');
-let score = 0;
-let running = false;
-let objects = [];
-let lastSpawn = 0;
-const beep = new (window.AudioContext||window.webkitAudioContext)();
-function playBeep(){
-  const osc = beep.createOscillator();
-  const gain = beep.createGain();
-  osc.frequency.value = 440;
-  osc.connect(gain);gain.connect(beep.destination);
-  gain.gain.setValueAtTime(0.2,beep.currentTime);
-  osc.start();
-  osc.stop(beep.currentTime+0.1);
-}
-function spawn(){
-  const size = 20+Math.random()*15;
-  objects.push({x:Math.random()*(gameCanvas.width-size), y:-size, size, speed:1+Math.random()*2});
-}
-function update(dt){
-  if(!running) return;
-  if(performance.now()-lastSpawn>800){spawn();lastSpawn=performance.now();}
-  objects.forEach(o=>o.y+=o.speed);
-  objects = objects.filter(o=>o.y<gameCanvas.height+o.size);
-}
-function draw(){
-  ctx.clearRect(0,0,gameCanvas.width,gameCanvas.height);
-  ctx.fillStyle = '#ff6f61';
-  objects.forEach(o=>{ctx.beginPath();ctx.arc(o.x+o.size/2,o.y+o.size/2,o.size/2,0,Math.PI*2);ctx.fill();});
-}
-let lastTime=0;
-function loop(ts){
-  const dt = ts-lastTime; lastTime=ts;
-  update(dt);
-  draw();
-  if(running) requestAnimationFrame(loop);
-}
-function startGame(){
-  score=0; objects=[]; running=true; document.getElementById('score').textContent='Score: 0';
-  document.getElementById('restartBtn').style.display='none';
-  requestAnimationFrame(loop);
-}
-function endGame(){
-  running=false;
-  document.getElementById('restartBtn').style.display='block';
-}
-gameCanvas.addEventListener('pointerdown',e=>{
-  const rect = gameCanvas.getBoundingClientRect();
-  const x = e.clientX-rect.left;
-  const y = e.clientY-rect.top;
-  for(let i=objects.length-1;i>=0;i--){
-    const o=objects[i];
-    const dx=x-(o.x+o.size/2), dy=y-(o.y+o.size/2);
-    if(dx*dx+dy*dy< (o.size/2)*(o.size/2)){
-      objects.splice(i,1);
-      score++; document.getElementById('score').textContent='Score: '+score;
-      playBeep();
-      break;
-    }
-  }
-});
-document.getElementById('restartBtn').addEventListener('click',startGame);
-startGame();
+document.querySelectorAll('section').forEach(sec=>observer.observe(sec));
 </script>
+<script>/* nixforge safety net: content never stays hidden, 3D failure degrades gracefully */
+(function(){function showAll(){document.querySelectorAll('section,[data-reveal],.reveal,.fade,.hidden-init').forEach(function(e){e.classList.add('show','visible','in','active','revealed');e.style.opacity='1';e.style.transform='none';});}
+window.addEventListener('error',function(e){console.error('nixforge-caught',e.message);showAll();document.documentElement.classList.add('no3d');});
+window.addEventListener('unhandledrejection',function(){showAll();});
+setTimeout(showAll,2500);
+try{var c=document.createElement('canvas');if(!(c.getContext('webgl2')||c.getContext('webgl')))document.documentElement.classList.add('no3d');}catch(_){document.documentElement.classList.add('no3d');}})();</script>
+<style>html.no3d canvas{background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.25),transparent 60%),linear-gradient(135deg,#2b2b40,#6a5acd 50%,#ff7a59);border-radius:16px}</style>
 </body>
 </html>

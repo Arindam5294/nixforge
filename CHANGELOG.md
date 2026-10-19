@@ -1,5 +1,11 @@
 # ⚒ NIXFORGE changelog
 
+## v0.4.5 — real 3D models, never a hidden page
+- Verified free GLB models (realistic t-shirt, sneaker, sunglasses, watch, sofa) used instead of box shapes when they fit.
+- Safety net injected in every site: sections always become visible even if the 3D crashes or WebGL is off, with a styled fallback.
+- No bonus games or unrelated sections.
+- Each build publishes build-report.json + preview.png next to the site.
+
 ## v0.4.4 — no more blank pages
 - Websites are written with a long-output brain (up to 32k tokens) and auto-continued if the model stops mid-file.
 - Proven three.js skeleton in the prompt; scripts that use import are auto-promoted to modules.

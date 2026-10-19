@@ -287,7 +287,9 @@ class Helpers:
             return self.publish(filename, "<!DOCTYPE html><title>dry</title>")
         html, shot, problems = build_site(str(brief), self.tmp)
         url = self.publish(filename, html)
+        self.publish("build-report.json", json.dumps({"problems_left": problems, "browser_checked": bool(shot)}, indent=1))
         if shot:
+            self.publish("preview.png", Path(shot).read_bytes())
             self.send_file(str(shot), f"🖼 Preview\n{url}")
         return url
 

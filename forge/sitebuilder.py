@@ -53,8 +53,23 @@ real product site, not a demo. Hard rules:
   addEventListener('resize', resize); resize();
   renderer.setAnimationLoop(() => {{ controls.update(); renderer.render(scene, camera); }});
   </script>
+- REAL 3D MODELS beat primitive shapes: when the subject matches, load one of these verified CORS-safe GLB files
+  instead of building boxes/cylinders (never invent other model URLs):
+    t-shirt (realistic, recolour its material): https://cdn.jsdelivr.net/gh/Starklord17/threejs-t-shirt@main/public/shirt_baked.glb
+    sneaker/shoe:   https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb
+    sunglasses:     https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/SunglassesKhronos/glTF-Binary/SunglassesKhronos.glb
+    watch:          https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/ChronographWatch/glTF-Binary/ChronographWatch.glb
+    sofa/furniture: https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/SheenWoodLeatherSofa/glTF-Binary/SheenWoodLeatherSofa.glb
+  Load + auto-fit like this (keeps any model framed):
+    import {{ GLTFLoader }} from 'three/addons/loaders/GLTFLoader.js';
+    new GLTFLoader().load(URL, g => {{ const m = g.scene; const box = new THREE.Box3().setFromObject(m);
+      const size = box.getSize(new THREE.Vector3()).length(); const c = box.getCenter(new THREE.Vector3());
+      m.position.sub(c); m.scale.setScalar(2.2/size); m.position.y += 0.9; m.traverse(o => {{ if (o.isMesh) {{ o.castShadow = true; }} }});
+      scene.add(m); }});
+  Colour swatches recolour a model by setting color on its meshes' materials.
+- Only build what the brief asks for: no bonus games, quizzes or unrelated sections.
 - Keep the page compact: lean CSS, no giant repeated blocks, so the WHOLE file fits (aim under 30 KB). Always finish with </html>.
-- Games: start screen, score, restart, keyboard + touch controls, sound via WebAudio.
+- If (and only if) the brief is a game: start screen, score, restart, keyboard + touch controls, sound via WebAudio.
 - No external images that might 404; use CSS gradients, SVG, emoji or procedural canvas textures.
 Return ONLY the HTML, starting with <!DOCTYPE html>."""
 
@@ -65,6 +80,15 @@ def _clean(txt: str) -> str:
         txt = m.group(1)
     i = txt.find("<!")
     return (txt[i:] if i >= 0 else txt).strip()
+
+
+SAFETY = """<script>/* nixforge safety net: content never stays hidden, 3D failure degrades gracefully */
+(function(){function showAll(){document.querySelectorAll('section,[data-reveal],.reveal,.fade,.hidden-init').forEach(function(e){e.classList.add('show','visible','in','active','revealed');e.style.opacity='1';e.style.transform='none';});}
+window.addEventListener('error',function(e){console.error('nixforge-caught',e.message);showAll();document.documentElement.classList.add('no3d');});
+window.addEventListener('unhandledrejection',function(){showAll();});
+setTimeout(showAll,2500);
+try{var c=document.createElement('canvas');if(!(c.getContext('webgl2')||c.getContext('webgl')))document.documentElement.classList.add('no3d');}catch(_){document.documentElement.classList.add('no3d');}})();</script>
+<style>html.no3d canvas{background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.25),transparent 60%),linear-gradient(135deg,#2b2b40,#6a5acd 50%,#ff7a59);border-radius:16px}</style>"""
 
 
 def repair(html: str) -> str:
@@ -78,6 +102,8 @@ def repair(html: str) -> str:
     # imports inside a classic <script> are a SyntaxError: promote those scripts to modules
     html = re.sub(r"<script(?![^>]*\btype=)([^>]*)>(?=(?:(?!</script>).)*?\bimport\s[^;]*?\bfrom\s*['\"])",
                   r'<script type="module"\1>', html, flags=re.S | re.I)
+    if "nixforge safety net" not in html:
+        html = re.sub(r"</body>", SAFETY + "\n</body>", html, count=1, flags=re.I) if re.search(r"</body>", html, re.I) else html + SAFETY
     if "viewport" not in html:
         html = re.sub(r"<head([^>]*)>", r'<head\1>\n<meta name="viewport" content="width=device-width,initial-scale=1">', html, count=1, flags=re.I)
     return html
@@ -92,6 +118,8 @@ def _browser_ready() -> bool:
                        capture_output=True, text=True)
     if r.returncode:
         r = subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], capture_output=True, text=True)
+    if r.returncode:
+        log(f"sitebuilder: chromium install failed: {(r.stderr or r.stdout)[-400:]}")
     return r.returncode == 0
 
 
@@ -170,7 +198,7 @@ def build_site(brief: str, workdir: Path, rounds: int = 3):
                 break
             html = repair(_write(f"BRIEF: {brief}\n\nFix: {'; '.join(p)}. Write the COMPLETE index.html."))
         log("sitebuilder: no headless browser, structural check only")
-        return html, None, structural(html)
+        return html, None, structural(html) + ["headless browser unavailable on runner"]
     for n in range(rounds):
         shot = workdir / f"shot{n}.png"
         problems = structural(html)
