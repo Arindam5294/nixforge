@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nyx Streetwear – 360° Collection</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Three.js import map -->
+
+
+<style>
+/* ==== Reset & Base ==== */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Inter',sans-serif;
+  line-height:1.6;
+  color:#e0e0e0;
+  background:#0a0a0a;
+  overflow-x:hidden;
+}
+
+/* ==== Palette ==== */
+:root{
+  --clr-bg:#0a0a0a;
+  --clr-primary:#0ff;      /* electric neon */
+  --clr-secondary:#ff0;
+  --clr-accent:#ff0066;
+  --clr-slate:#2b2b2b;
+  --clr-obsidian:#111;
+}
+
+/* ==== Layout ==== */
+section{padding:4rem 1.5rem;max-width:1200px;margin:auto;}
+h1,h2{font-family:'Orbitron',sans-serif;letter-spacing:0.05em;}
+h1{font-size:2.5rem;color:var(--clr-primary);}
+h2{font-size:2rem;color:var(--clr-secondary);margin-bottom:1rem;}
+p{margin-bottom:1rem;color:#c0c0c0;}
+button{
+  cursor:pointer;
+  border:none;
+  background:var(--clr-primary);
+  color:#000;
+  padding:.75rem 1.5rem;
+  font-weight:500;
+  border-radius:4px;
+  transition:transform .2s,background .2s;
+}
+button:hover,button:focus{transform:scale(1.05);background:#0dd;}
+a{color:var(--clr-primary);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* ==== Hero ==== */
+#hero{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  background:linear-gradient(135deg,#111 0%,#0a0a0a 100%);
+}
+#hero h1{font-size:3rem;}
+#hero p{font-size:1.2rem;max-width:30rem;}
+#hero .cta{margin-top:2rem;}
+
+/* ==== 3D Viewer ==== */
+#viewer-wrapper{
+  position:relative;
+  width:100%;
+  padding-top:75%; /* 4:3 ratio */
+  background:var(--clr-slate);
+  border-radius:8px;
+  overflow:hidden;
+}
+#viewer{position:absolute;top:0;left:0;width:100%;height:100%;}
+#fabric-controls{
+  display:flex;
+  gap:.5rem;
+  position:absolute;
+  bottom:1rem;
+  left:50%;
+  transform:translateX(-50%);
+}
+#fabric-controls button{
+  background:rgba(0,255,255,.2);
+  color:#fff;
+  font-size:.9rem;
+}
+
+/* ==== Cards ==== */
+.cards{
+  display:grid;
+  gap:1.5rem;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+}
+.card{
+  background:var(--clr-slate);
+  border-radius:8px;
+  padding:1rem;
+  text-align:center;
+  transition:transform .3s;
+}
+.card:hover{transform:translateY(-5px);}
+.card .price{font-weight:500;color:var(--clr-primary);margin-top:.5rem;}
+
+/* ==== Product Showcase ==== */
+#product{
+  display:flex;
+  flex-direction:column;
+  gap:2rem;
+}
+#product .options{
+  display:flex;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+#product .options button{
+  background:var(--clr-accent);
+}
+#product .preview{
+  width:100%;
+  max-width:300px;
+  aspect-ratio:1;
+  margin:auto;
+  background:var(--clr-slate);
+  border-radius:8px;
+  position:relative;
+}
+#product .preview::after{
+  content:"👕";
+  font-size:6rem;
+  position:absolute;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#555;
+}
+
+/* ==== Shopping Bag Drawer ==== */
+#bag{
+  position:fixed;
+  top:0;
+  right:-100%;
+  width:80%;
+  max-width:320px;
+  height:100%;
+  background:var(--clr-obsidian);
+  box-shadow:-4px 0 12px rgba(0,0,0,.7);
+  transition:right .4s;
+  padding:2rem 1rem;
+  overflow-y:auto;
+  z-index:1000;
+}
+#bag.open{right:0;}
+#bag h3{margin-bottom:1rem;color:var(--clr-primary);}
+#bag ul{list-style:none;}
+#bag li{margin-bottom:.5rem;color:#ccc;}
+#bag button{margin-top:1rem;background:#555;color:#fff;}
+
+/* ==== Lookbook ==== */
+.gallery{
+  display:grid;
+  gap:.75rem;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+}
+.gallery div{
+  background:linear-gradient(45deg,#111,#222);
+  aspect-ratio:1;
+  border-radius:4px;
+  position:relative;
+  overflow:hidden;
+}
+.gallery div::after{
+  content:"📸";
+  font-size:2rem;
+  position:absolute;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#555;
+}
+
+/* ==== Heritage ==== */
+#heritage{
+  background:var(--clr-slate);
+  border-left:4px solid var(--clr-primary);
+  padding-left:1rem;
+}
+
+/* ==== Reviews ==== */
+.review{
+  background:var(--clr-obsidian);
+  padding:1rem;
+  border-radius:6px;
+  margin-bottom:1rem;
+}
+.review p{font-style:italic;}
+.review .author{margin-top:.5rem;font-weight:500;color:var(--clr-primary);}
+
+/* ==== CTA ==== */
+#cta{
+  background:linear-gradient(90deg,var(--clr-primary),var(--clr-secondary));
+  color:#000;
+  text-align:center;
+  padding:3rem 1rem;
+}
+#cta button{background:#000;color:var(--clr-primary);}
+
+/* ==== Game ==== */
+#game{
+  background:#111;
+  color:#fff;
+  text-align:center;
+  padding:2rem 1rem;
+}
+#game canvas{
+  background:#222;
+  border:2px solid var(--clr-primary);
+  border-radius:8px;
+  max-width:100%;
+}
+
+/* ==== Footer ==== */
+footer{
+  background:#000;
+  color:#777;
+  text-align:center;
+  padding:2rem 1rem;
+  font-size:.9rem;
+}
+
+/* ==== Reveal Animations ==== */
+[data-reveal]{
+  opacity:0;
+  transform:translateY(20px);
+  transition:opacity .6s ease-out,transform .6s ease-out;
+}
+[data-reveal].visible{
+  opacity:1;
+  transform:none;
+}
+
+/* ==== Media Queries ==== */
+@media(min-width:768px){
+  #hero h1{font-size:4rem;}
+  #hero p{font-size:1.4rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<section id="hero" data-reveal>
+  <h1>NYX STREETWEAR</h1>
+  <p>Where cyber‑future meets urban grit. Limited drops, hyper‑crafted.</p>
+  <div class="cta"><button id="shopNow">Shop the Drop</button></div>
+</section>
+
+<!-- 3D Garment Viewer -->
+<section data-reveal>
+  <h2>360° Garment Viewer</h2>
+  <p>Orbit, switch fabrics, and feel the cut.</p>
+  <div id="viewer-wrapper">
+    <canvas id="viewer"></canvas>
+    <div id="fabric-controls">
+      <button data-fabric="solid">Solid</button>
+      <button data-fabric="stripes">Stripes</button>
+      <button data-fabric="noise">Noise</button>
+    </div>
+  </div>
+</section>
+
+<!-- New Arrivals -->
+<section data-reveal>
+  <h2>New Arrivals</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>Neon Pulse Hoodie</h3>
+      <p>Glow‑in‑the‑dark weave.</p>
+      <div class="price">$129</div>
+      <button class="add-to-bag" data-name="Neon Pulse Hoodie" data-price="$129">Add to Bag</button>
+    </div>
+    <div class="card">
+      <h3>Obsidian Cargo Pants</h3>
+      <p>Utility meets sleek.</p>
+      <div class="price">$99</div>
+      <button class="add-to-bag" data-name="Obsidian Cargo Pants" data-price="$99">Add to Bag</button>
+    </div>
+    <div class="card">
+      <h3>Cyber Tee</h3>
+      <p>Minimalist tech‑print.</p>
+      <div class="price">$59</div>
+      <button class="add-to-bag" data-name="Cyber Tee" data-price="$59">Add to Bag</button>
+    </div>
+  </div>
+</section>
+
+<!-- Product Showcase -->
+<section id="product" data-reveal>
+  <h2>Product Detail</h2>
+  <p>Choose your style.</p>
+  <div class="preview" id="productPreview"></div>
+  <div class="options">
+    <button data-color="#0ff">Electric Blue</button>
+    <button data-color="#ff0">Neon Yellow</button>
+    <button data-color="#ff0066">Neon Pink</button>
+    <button data-size="S">S</button>
+    <button data-size="M">M</button>
+    <button data-size="L">L</button>
+    <button id="addToBag">Add to Bag</button>
+  </div>
+</section>
+
+<!-- Shopping Bag Drawer -->
+<div id="bag" aria-hidden="true">
+  <h3>Your Bag</h3>
+  <ul id="bagList"></ul>
+  <button id="closeBag">Close</button>
+</div>
+
+<!-- Lookbook Gallery -->
+<section data-reveal>
+  <h2>Lookbook</h2>
+  <div class="gallery">
+    <div></div><div></div><div></div><div></div><div></div><div></div>
+  </div>
+</section>
+
+<!-- Brand Heritage -->
+<section id="heritage" data-reveal>
+  <h2>Our Story</h2>
+  <p>Founded in 2022, NYX blends avant‑garde tech with street‑level attitude. Each piece is engineered in a virtual studio, printed on demand, and shipped in recyclable packaging.</p>
+</section>
+
+<!-- Reviews -->
+<section data-reveal>
+  <h2>Customer Reviews</h2>
