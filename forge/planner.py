@@ -38,9 +38,10 @@ write a `code` step (real Python 3.12) that does the whole job. Rules:
 - The owner wants RESULTS on Telegram: on-demand tasks end with h.notify(...)
   carrying the actual result (text, link from h.publish, or h.send_file).
   Watchers notify only when h.changed(...) says something is new.
-- Websites/pages/files to share: generate them (h.llm can write full HTML/JS,
-  three.js via CDN https://unpkg.com/three@0.160.0/build/three.module.js is fine)
-  and host with h.publish("index.html", html); notify the URL.
+- Websites, landing pages, stores, web apps, games, anything 3D: ALWAYS
+  url = h.build_site("<the owner's full request, expanded into a rich design brief:
+  brand, audience, sections, 3D subject, mood, colours>") then h.notify(f"... {url}").
+  Never hand-write HTML with h.llm for these. Other files: h.publish(name, content).
 - schedule: 5-field cron in tz Asia/Kolkata, never more often than every 15 min.
   Omit schedule for one-off / "now" / on-demand tasks (they run right after
   approval). Sub-15-minute timing ("every second for 5 seconds") = a loop with
@@ -54,13 +55,10 @@ EXAMPLE = {
     "id": "game_3d_site", "title": "3D game website", "tz": "Asia/Kolkata", "status": "pending",
     "steps": [{"id": "main", "use": "code", "with": {"source": (
         "def run(h):\n"
-        "    html = h.llm('Write ONE complete self-contained index.html: a playable 3D browser game '\n"
-        "                 'using three.js as an ES module from https://unpkg.com/three@0.160.0/build/three.module.js. '\n"
-        "                 'Keyboard + touch controls, score, restart. Return ONLY the HTML.')\n"
-        "    start = html.find('<!'); html = html[start:] if start >= 0 else html\n"
-        "    html = html.split('```')[0]\n"
-        "    url = h.publish('index.html', html)\n"
-        "    h.notify('🕹 Your 3D game site is live: ' + url)\n"
+        "    url = h.build_site('A playable neon 3D endless-runner game in the browser: glowing tunnel, '\n"
+        "                       'player ship dodging obstacles, start screen, score + best score, restart, '\n"
+        "                       'swipe/tap + arrow-key controls, synthwave palette, WebAudio sound effects.')\n"
+        "    h.notify('🕹 Your 3D game is live: ' + url)\n"
         "    return url\n")}}],
     "tests": ["str(main).startswith('http')"],
 }

@@ -1,5 +1,9 @@
 # ⚒ NIXFORGE changelog
 
+## v0.4.3 — sites that actually work
+- New h.build_site(): art-director prompt, auto-fixed three.js imports (importmap), then a real headless-Chrome check (JS errors, blank 3D canvas, empty page) with up to 3 rewrite rounds. Sends you a screenshot with the link.
+- Planner always uses it for websites, stores, apps, games and 3D.
+
 ## v0.4.2 — answers first
 - Every request runs right away and replies with the result (no silent approval wait). Scheduled ones stay on; /pause to stop.
 - New update channel: patches/*.url files apply a patch.

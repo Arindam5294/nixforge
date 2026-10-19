@@ -216,6 +216,8 @@ CODE_HELP = """code(source) -> runs `def run(h):` and returns its result. h give
   h.llm(prompt, system=None) -> text from the free LLM chain (big outputs OK)
   h.notify(text) -> Telegram message to the OWNER     h.send_file(path, caption='')
   h.publish(filename, content) -> public URL of a hosted file (html sites, json, txt)
+  h.build_site(brief) -> URL: designs, writes, browser-tests and publishes a website / web app / game / 3D page,
+      and sends the owner a screenshot. ALWAYS use this for any site/app/game/3D request (brief = full detailed request).
   h.changed(key, value) -> True only when value differs from last run (first run False)
   h.state -> dict saved between runs   h.sleep(s)   h.log(msg)   h.tmp -> temp dir Path
   any pip lib already installed: requests, bs4, feedparser, yaml, yt-dlp; ffmpeg on PATH."""
@@ -275,6 +277,18 @@ class Helpers:
             out.parent.mkdir(parents=True, exist_ok=True)
             (out.write_bytes if isinstance(content, bytes) else out.write_text)(content)
             self._ctx.setdefault("_published", []).append(str(out))
+        return url
+
+    def build_site(self, brief, filename="index.html"):
+        """Design + write + browser-test a website/game/3D page, publish it, send a screenshot. Returns URL."""
+        from .sitebuilder import build_site
+        if self.dry:
+            log("[dry-run] would build site")
+            return self.publish(filename, "<!DOCTYPE html><title>dry</title>")
+        html, shot, problems = build_site(str(brief), self.tmp)
+        url = self.publish(filename, html)
+        if shot:
+            self.send_file(str(shot), f"🖼 Preview\n{url}")
         return url
 
     def changed(self, key, value):
