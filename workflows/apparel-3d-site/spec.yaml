@@ -1,0 +1,19 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: apparel_3d_site
+title: 3D Apparel Business Website
+tz: Asia/Kolkata
+status: active
+steps:
+- id: main
+  use: code
+  with:
+    source: |
+      def run(h):
+          brief = "Create a 3D interactive website for an apparel business called 'TrendWave'. Brand modern, youthful, eco-friendly. Target audience 18-35 fashion-conscious shoppers. Include sections: Home with a 3D rotating showroom of clothing, Catalog with 3D models of outfits, About, Contact. 3D subject: virtual boutique with rotating mannequins displaying clothes, smooth animations. Mood: sleek, minimalist, pastel palette with vibrant accent colors. Colours: soft teal, white, charcoal, accent coral."
+          url = h.build_site(brief)
+          h.notify(f"🛍️ Your 3D apparel website is live: {url}")
+          return url
+tests:
+- str(main).startswith('http')
+request: Bruh you kidding me ? Okay build a 3d website for my Apparels business
+summary: A 3D interactive website for your apparel brand will be built and you’ll receive the live link.

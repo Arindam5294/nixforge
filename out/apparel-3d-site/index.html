@@ -1,278 +1,361 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <meta charset="UTF-8">
-<title>Luxora – 3D Streetwear Showroom</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrendWave – Eco‑Friendly Fashion</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
 <style>
-  :root {
-    --bg-dark: #0a0a0a;
-    --accent-gold: #d4af37;
-    --text-light: #f5f5f5;
-    --overlay-bg: rgba(0,0,0,0.6);
-    --modal-bg: #111;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{
-    margin:0;
-    font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;
-    background: var(--bg-dark);
-    color: var(--text-light);
-    overflow:hidden;
-  }
-  #ui{
-    position:absolute;
-    top:0;left:0;right:0;
-    display:flex;
-    flex-direction:column;
-    height:100vh;
-    pointer-events:none;
-  }
-  header{
-    padding:1rem 2rem;
-    font-size:1.5rem;
-    font-weight:300;
-    color:var(--accent-gold);
-    pointer-events:auto;
-  }
-  .panel{
-    margin-top:auto;
-    background:var(--overlay-bg);
-    backdrop-filter:blur(8px);
-    padding:1rem 2rem;
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:1rem;
-    pointer-events:auto;
-  }
-  .panel > *{
-    margin:0;
-  }
-  select, .size-picker button{
-    background:transparent;
-    border:1px solid var(--accent-gold);
-    color:var(--text-light);
-    padding:.5rem 1rem;
-    font-size:1rem;
-    cursor:pointer;
-  }
-  .color-swatch{
-    width:24px;height:24px;border-radius:50%;border:2px solid #fff;cursor:pointer;
-  }
-  .price{
-    font-size:1.2rem;font-weight:bold;
-    margin-left:auto;
-  }
-  .add-to-bag{
-    background:var(--accent-gold);
-    border:none;
-    color:#000;
-    padding:.6rem 1.2rem;
-    font-weight:bold;
-    cursor:pointer;
-    transition:transform .2s;
-  }
-  .add-to-bag:hover{transform:scale(1.05);}
-  /* Modal */
-  #modal{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.8);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:10;
-  }
-  #modal .content{
-    background:var(--modal-bg);
-    padding:2rem;
-    border-radius:8px;
-    max-width:90%;
-    width:320px;
-    text-align:center;
-    color:var(--text-light);
-  }
-  #modal button{
-    margin-top:1rem;
-    background:var(--accent-gold);
-    border:none;
-    color:#000;
-    padding:.5rem 1rem;
-    cursor:pointer;
-  }
-  @media (max-width:600px){
-    header{font-size:1.2rem;padding:0.8rem 1rem;}
-    .panel{flex-direction:column;align-items:stretch;}
-    .price{margin-left:0;}
-    .add-to-bag{width:100%;}
-  }
+:root{
+  --clr-bg:#f5fbff;
+  --clr-primary:#88d8c0;
+  --clr-accent:#ff6f61;
+  --clr-dark:#333;
+  --font-display:'Poppins',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --gap:1.5rem;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;font-family:var(--font-body);}
+body{background:var(--clr-bg);color:var(--clr-dark);}
+h1,h2{font-family:var(--font-display);font-weight:700;color:var(--clr-dark);}
+h1{font-size:2rem;}
+h2{font-size:1.5rem;margin-bottom:var(--gap);}
+p{line-height:1.5;margin-bottom:var(--gap);}
+a{color:inherit;text-decoration:none;}
+section{padding:calc(var(--gap)*2) var(--gap);opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s;}
+section.show{opacity:1;transform:none;}
+nav{
+  position:sticky;top:0;background:#fff;display:flex;justify-content:space-between;align-items:center;padding:var(--gap);
+  box-shadow:0 2px 6px rgba(0,0,0,.05);z-index:10;
+}
+nav a{margin:0 .5rem;font-weight:500;}
+nav a:hover{color:var(--clr-primary);}
+button{
+  background:var(--clr-primary);color:#fff;border:none;padding:.75rem 1.5rem;border-radius:4px;
+  font-family:var(--font-display);font-size:1rem;cursor:pointer;transition:transform .2s;
+}
+button:active{transform:scale(.95);}
+.container{max-width:960px;margin:auto;}
+#stage{width:100%;height:100%;display:block;}
+.stage-wrapper{height:70vh;overflow:hidden;}
+/* Catalog cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:var(--gap);}
+.card{
+  background:#fff;padding:var(--gap);border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);
+  text-align:center;transition:transform .3s;
+}
+.card:hover{transform:translateY(-4px);}
+.card canvas{width:100%;height:80px;}
+/* Game */
+#gameCanvas{background:#fff;border:2px solid var(--clr-primary);border-radius:8px;display:block;margin:auto;}
+#score{font-size:1.2rem;margin:1rem 0;text-align:center;}
+@media(min-width:600px){
+  h1{font-size:2.5rem;}
+}
 </style>
 </head>
 <body>
-<div id="ui">
-  <header>Luxora</header>
-  <div class="panel">
-    <label for="product">Product:
-      <select id="product">
-        <option value="hoodie">Hoodie</option>
-        <option value="jacket">Jacket</option>
-        <option value="tshirt">T‑Shirt</option>
-      </select>
-    </label>
-
-    <label>Color:
-      <div id="colors" style="display:inline-flex;gap:.4rem;">
-        <div class="color-swatch" data-color="#d4af37" style="background:#d4af37;"></div>
-        <div class="color-swatch" data-color="#111111" style="background:#111;"></div>
-        <div class="color-swatch" data-color="#e63946" style="background:#e63946;"></div>
-        <div class="color-swatch" data-color="#1d3557" style="background:#1d3557;"></div>
-      </div>
-    </label>
-
-    <label>Size:
-      <div class="size-picker">
-        <button data-size="S">S</button>
-        <button data-size="M">M</button>
-        <button data-size="L">L</button>
-        <button data-size="XL">XL</button>
-      </div>
-    </label>
-
-    <div class="price">$299</div>
-
-    <button class="add-to-bag">Add to Bag</button>
+<nav>
+  <div><strong>TrendWave</strong></div>
+  <div>
+    <a href="#home">Home</a>
+    <a href="#catalog">Catalog</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="#game">Play</a>
   </div>
-</div>
+</nav>
 
-<div id="modal">
-  <div class="content">
-    <h2>Item added to bag</h2>
-    <p id="modal-details"></p>
-    <button id="close-modal">Continue Shopping</button>
+<section id="home" class="show">
+  <div class="container">
+    <h1>Ride the Wave of Sustainable Style</h1>
+    <p>Discover eco‑friendly fashion that moves with you. Our virtual boutique lets you explore every stitch in 3D.</p>
+    <div class="stage-wrapper"><canvas id="stage"></canvas></div>
   </div>
-</div>
+</section>
+
+<section id="catalog">
+  <div class="container">
+    <h2>Our Collection</h2>
+    <div class="grid">
+      <div class="card">
+        <canvas class="mini" data-type="tshirt"></canvas>
+        <p>Organic Tee</p><p>$29</p>
+      </div>
+      <div class="card">
+        <canvas class="mini" data-type="dress"></canvas>
+        <p>Recycled Dress</p><p>$79</p>
+      </div>
+      <div class="card">
+        <canvas class="mini" data-type="jacket"></canvas>
+        <p>Hemp Jacket</p><p>$119</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="container">
+    <h2>Our Story</h2>
+    <p>Founded in 2022, TrendWave blends cutting‑edge design with responsibly sourced fabrics. Every piece is crafted to reduce waste while keeping you on trend.</p>
+    <p>Join the movement—fashion that feels good and does good.</p>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="container">
+    <h2>Get in Touch</h2>
+    <p>Have questions? Want to collaborate? Drop us a line.</p>
+    <p><strong>Email:</strong> hello@trendwave.com</p>
+    <p><strong>Instagram:</strong> @trendwave_fashion</p>
+  </div>
+</section>
+
+<section id="game">
+  <div class="container">
+    <h2>Wave Catch</h2>
+    <p>Tap the floating waves before they fade. Score as high as you can!</p>
+    <div id="score">Score: 0</div>
+    <canvas id="gameCanvas" width="300" height="400"></canvas>
+    <button id="restartBtn" style="margin-top:1rem;display:none;">Play Again</button>
+  </div>
+</section>
 
 <script type="module">
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import {OrbitControls} from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
-let scene, camera, renderer, controls;
-let podium, garment;
-let currentColor = 0xd4af37;
-let currentSize = 'M';
-let currentProduct = 'hoodie';
+// ---------- 3D SHOWROOM ----------
+const canvas = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, preserveDrawingBuffer:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
 
-init();
-animate();
+const scene = new THREE.Scene();
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),0.04).texture;
 
-function init(){
-  // Renderer
-  renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
-  document.body.appendChild(renderer.domElement);
-  renderer.setClearColor(0x0a0a0a, 1);
+const camera = new THREE.PerspectiveCamera(40,1,0.1,100);
+camera.position.set(0,1.2,5);
 
-  // Scene & Camera
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 100);
-  camera.position.set(0,1.5,3);
+const controls = new OrbitControls(camera,canvas);
+controls.enableDamping = true;
+controls.autoRotate = true;
+controls.target.set(0,0.8,0);
 
-  // Controls
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.minDistance = 2;
-  controls.maxDistance = 6;
-  controls.enablePan = false;
+// Lights
+scene.add(new THREE.HemisphereLight(0xffffff,0x222233,1.2));
+const key = new THREE.DirectionalLight(0xffffff,2.5);
+key.position.set(3,5,4);
+key.castShadow = true;
+scene.add(key);
 
-  // Lights
-  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-  scene.add(ambient);
-  const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-  dirLight.position.set(5,5,5);
-  scene.add(dirLight);
-  const pointLight = new THREE.PointLight(0xffd700, 0.8, 10);
-  pointLight.position.set(-2,3,2);
-  scene.add(pointLight);
+// FLOOR
+const floorGeo = new THREE.PlaneGeometry(10,10);
+const floorMat = new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.8});
+const floor = new THREE.Mesh(floorGeo,floorMat);
+floor.rotation.x = -Math.PI/2;
+floor.receiveShadow = true;
+scene.add(floor);
 
-  // Podium (rotating cylinder)
-  const podGeo = new THREE.CylinderGeometry(1,1,0.2,64);
-  const podMat = new THREE.MeshStandardMaterial({color:0x111111, metalness:0.8, roughness:0.2});
-  podium = new THREE.Mesh(podGeo, podMat);
-  podium.position.y = -0.5;
-  scene.add(podium);
+// PODIUM
+const podiumGeo = new THREE.CylinderGeometry(0.8,0.8,0.2,32);
+const podiumMat = new THREE.MeshStandardMaterial({color:0xeeeeee});
+const podium = new THREE.Mesh(podiumGeo,podiumMat);
+podium.position.y = 0.1;
+podium.castShadow = true;
+podium.receiveShadow = true;
+scene.add(podium);
 
-  // Garment placeholder (torus knot)
-  const garGeo = new THREE.TorusKnotGeometry(0.4,0.15,100,16);
-  const garMat = new THREE.MeshStandardMaterial({color:currentColor, metalness:0.5, roughness:0.3});
-  garment = new THREE.Mesh(garGeo, garMat);
-  garment.position.y = 0.2;
-  scene.add(garment);
+// MANNEQUIN (simple)
+function createMannequin(){
+  const group = new THREE.Group();
 
-  // Resize handling
-  window.addEventListener('resize', onWindowResize);
+  // torso
+  const torsoGeo = new THREE.CylinderGeometry(0.25,0.25,0.6,32);
+  const torsoMat = new THREE.MeshStandardMaterial({color:0xdddddd});
+  const torso = new THREE.Mesh(torsoGeo,torsoMat);
+  torso.position.y = 0.8;
+  torso.castShadow = true;
+  group.add(torso);
 
-  // UI interactions
-  document.querySelectorAll('.color-swatch').forEach(el=>{
-    el.addEventListener('click',()=>{ 
-      const col = el.dataset.color;
-      currentColor = new THREE.Color(col).getHex();
-      garment.material.color.setHex(currentColor);
-    });
-  });
+  // head
+  const headGeo = new THREE.SphereGeometry(0.18,32,32);
+  const head = new THREE.Mesh(headGeo,torsoMat);
+  head.position.y = 1.25;
+  head.castShadow = true;
+  group.add(head);
 
-  document.querySelectorAll('.size-picker button').forEach(btn=>{
-    btn.addEventListener('click',()=>{ 
-      currentSize = btn.dataset.size;
-      document.querySelectorAll('.size-picker button').forEach(b=>b.style.borderColor='var(--accent-gold)');
-      btn.style.borderColor='#fff';
-    });
-  });
+  // legs
+  const legGeo = new THREE.CylinderGeometry(0.09,0.09,0.7,32);
+  const leftLeg = new THREE.Mesh(legGeo,torsoMat);
+  leftLeg.position.set(-0.12,0.35,0);
+  leftLeg.castShadow = true;
+  const rightLeg = leftLeg.clone();
+  rightLeg.position.x = 0.12;
+  group.add(leftLeg,rightLeg);
 
-  document.getElementById('product').addEventListener('change',e=>{
-    currentProduct = e.target.value;
-    // In a real app you would load a different model here.
-    // For demo we just change geometry slightly.
-    const geo = (currentProduct==='hoodie')? new THREE.TorusKnotGeometry(0.4,0.15,100,16)
-               :(currentProduct==='jacket')? new THREE.SphereGeometry(0.45,32,32)
-               : new THREE.BoxGeometry(0.8,1.2,0.2);
-    garment.geometry.dispose();
-    garment.geometry = geo;
-  });
+  // simple dress (extrude)
+  const shape = new THREE.Shape();
+  shape.moveTo(-0.3,0);
+  shape.lineTo(0.3,0);
+  shape.lineTo(0.2,0.6);
+  shape.lineTo(-0.2,0.6);
+  shape.closePath();
+  const extrude = new THREE.ExtrudeGeometry(shape,{depth:0.02,bevelEnabled:false});
+  const dressMat = new THREE.MeshStandardMaterial({color:0xff6f61});
+  const dress = new THREE.Mesh(extrude,dressMat);
+  dress.rotation.x = -Math.PI/2;
+  dress.position.set(0,0.8,0.02);
+  dress.castShadow = true;
+  group.add(dress);
 
-  document.querySelector('.add-to-bag').addEventListener('click',()=>{
-    const details = `Product: ${capitalize(currentProduct)}<br>
-                     Size: ${currentSize}<br>
-                     Color: ${new THREE.Color(currentColor).getStyle()}`;
-    document.getElementById('modal-details').innerHTML = details;
-    document.getElementById('modal').style.display='flex';
-  });
-
-  document.getElementById('close-modal').addEventListener('click',()=>{
-    document.getElementById('modal').style.display='none';
-  });
+  return group;
 }
+scene.add(createMannequin());
 
-function onWindowResize(){
-  camera.aspect = innerWidth/innerHeight;
+// Resize handling
+function resize(){
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  renderer.setSize(w,h,false);
+  camera.aspect = w/h;
   camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
 }
+addEventListener('resize',resize);
+resize();
 
-function animate(){
-  requestAnimationFrame(animate);
-  // Rotate podium slowly
-  podium.rotation.y += 0.002;
-  // Slight idle rotation of garment
-  garment.rotation.y += 0.001;
-  controls.update();
-  renderer.render(scene, camera);
-}
+renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera);});
 
-function capitalize(str){
-  return str.charAt(0).toUpperCase()+str.slice(1);
+// ---------- REVEAL ANIMATIONS ----------
+const observer = new IntersectionObserver((entries)=> {
+  entries.forEach(entry=> {
+    if(entry.isIntersecting) entry.target.classList.add('show');
+  });
+},{threshold:0.1});
+document.querySelectorAll('section').forEach(s=>observer.observe(s));
+
+// ---------- MINI 3D CANVASES IN CATALOG ----------
+function miniScene(canvas, type){
+  const r = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  r.setPixelRatio(Math.min(devicePixelRatio,2));
+  r.setSize(canvas.clientWidth,canvas.clientHeight);
+  const sc = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(45,1,0.1,10);
+  cam.position.set(0,1,2);
+  const ctrl = new OrbitControls(cam,canvas);
+  ctrl.enableZoom = false;
+  ctrl.enablePan = false;
+  ctrl.autoRotate = true;
+  ctrl.autoRotateSpeed = 2;
+  const light = new THREE.HemisphereLight(0xffffff,0x444444,1);
+  sc.add(light);
+  const dir = new THREE.DirectionalLight(0xffffff,0.8);
+  dir.position.set(2,4,3);
+  sc.add(dir);
+  // simple geometry per type
+  let mesh;
+  if(type==='tshirt'){
+    const geo = new THREE.BoxGeometry(0.6,0.8,0.02);
+    const mat = new THREE.MeshStandardMaterial({color:0x88d8c0});
+    mesh = new THREE.Mesh(geo,mat);
+    mesh.position.y = 0.4;
+  }else if(type==='dress'){
+    const shape = new THREE.Shape();
+    shape.moveTo(-0.3,0);
+    shape.lineTo(0.3,0);
+    shape.lineTo(0.2,0.6);
+    shape.lineTo(-0.2,0.6);
+    shape.closePath();
+    const geo = new THREE.ExtrudeGeometry(shape,{depth:0.02,bevelEnabled:false});
+    const mat = new THREE.MeshStandardMaterial({color:0xff6f61});
+    mesh = new THREE.Mesh(geo,mat);
+    mesh.rotation.x = -Math.PI/2;
+    mesh.position.y = 0.6;
+  }else{ // jacket
+    const geo = new THREE.BoxGeometry(0.6,0.9,0.02);
+    const mat = new THREE.MeshStandardMaterial({color:0x333333});
+    mesh = new THREE.Mesh(geo,mat);
+    mesh.position.y = 0.45;
+  }
+  sc.add(mesh);
+  function animate(){requestAnimationFrame(animate);ctrl.update();r.render(sc,cam);}
+  animate();
 }
+document.querySelectorAll('.mini').forEach(c=>miniScene(c,c.dataset.type));
+
+// ---------- SIMPLE GAME ----------
+const gameCanvas = document.getElementById('gameCanvas');
+const ctx = gameCanvas.getContext('2d');
+let score = 0;
+let running = false;
+let objects = [];
+let lastSpawn = 0;
+const beep = new (window.AudioContext||window.webkitAudioContext)();
+function playBeep(){
+  const osc = beep.createOscillator();
+  const gain = beep.createGain();
+  osc.frequency.value = 440;
+  osc.connect(gain);gain.connect(beep.destination);
+  gain.gain.setValueAtTime(0.2,beep.currentTime);
+  osc.start();
+  osc.stop(beep.currentTime+0.1);
+}
+function spawn(){
+  const size = 20+Math.random()*15;
+  objects.push({x:Math.random()*(gameCanvas.width-size), y:-size, size, speed:1+Math.random()*2});
+}
+function update(dt){
+  if(!running) return;
+  if(performance.now()-lastSpawn>800){spawn();lastSpawn=performance.now();}
+  objects.forEach(o=>o.y+=o.speed);
+  objects = objects.filter(o=>o.y<gameCanvas.height+o.size);
+}
+function draw(){
+  ctx.clearRect(0,0,gameCanvas.width,gameCanvas.height);
+  ctx.fillStyle = '#ff6f61';
+  objects.forEach(o=>{ctx.beginPath();ctx.arc(o.x+o.size/2,o.y+o.size/2,o.size/2,0,Math.PI*2);ctx.fill();});
+}
+let lastTime=0;
+function loop(ts){
+  const dt = ts-lastTime; lastTime=ts;
+  update(dt);
+  draw();
+  if(running) requestAnimationFrame(loop);
+}
+function startGame(){
+  score=0; objects=[]; running=true; document.getElementById('score').textContent='Score: 0';
+  document.getElementById('restartBtn').style.display='none';
+  requestAnimationFrame(loop);
+}
+function endGame(){
+  running=false;
+  document.getElementById('restartBtn').style.display='block';
+}
+gameCanvas.addEventListener('pointerdown',e=>{
+  const rect = gameCanvas.getBoundingClientRect();
+  const x = e.clientX-rect.left;
+  const y = e.clientY-rect.top;
+  for(let i=objects.length-1;i>=0;i--){
+    const o=objects[i];
+    const dx=x-(o.x+o.size/2), dy=y-(o.y+o.size/2);
+    if(dx*dx+dy*dy< (o.size/2)*(o.size/2)){
+      objects.splice(i,1);
+      score++; document.getElementById('score').textContent='Score: '+score;
+      playBeep();
+      break;
+    }
+  }
+});
+document.getElementById('restartBtn').addEventListener('click',startGame);
+startGame();
 </script>
 </body>
 </html>
