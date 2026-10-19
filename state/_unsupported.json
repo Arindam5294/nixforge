@@ -1,0 +1,6 @@
+[
+  {
+    "request": "Let's suppose say me hi every 1 second for next 5 seconds",
+    "why": "Sending messages at 1‑second intervals is not supported."
+  }
+]
