@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<meta charset="UTF-8">
+<title>NeonPulse Games</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a001f;
+  --neon:#00e5ff;
+  --mag:#ff00ff;
+  --purple:#7a00ff;
+  --txt:#e0e0e0;
+  --accent:#ff00ff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Roboto',sans-serif;
+  background:var(--bg);
+  color:var(--txt);
+  line-height:1.5;
+  overflow-x:hidden;
+}
+h1,h2{font-family:'Orbitron',sans-serif;letter-spacing:.05em;}
+header{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  background:linear-gradient(135deg,var(--bg),#15002b);
+  padding:2rem;
+}
+header h1{
+  font-size:3rem;
+  color:var(--neon);
+  text-shadow:0 0 10px var(--neon),0 0 20px var(--neon);
+}
+header p{
+  margin:1rem 0;
+  font-size:1.2rem;
+  color:var(--mag);
+}
+button{
+  font-family:'Orbitron',sans-serif;
+  background:var(--mag);
+  border:none;
+  padding:.8rem 2rem;
+  font-size:1rem;
+  color:#fff;
+  cursor:pointer;
+  border-radius:8px;
+  box-shadow:0 0 12px var(--mag);
+  transition:transform .2s,box-shadow .2s;
+}
+button:hover{transform:scale(1.05);box-shadow:0 0 20px var(--mag);}
+section{
+  padding:4rem 1.5rem;
+  max-width:800px;
+  margin:auto;
+}
+section:nth-of-type(even){background:rgba(255,255,255,.03);}
+h2{
+  font-size:2rem;
+  margin-bottom:.5rem;
+  color:var(--purple);
+  text-align:center;
+}
+p{margin:1rem 0;}
+footer{
+  text-align:center;
+  padding:2rem;
+  font-size:.9rem;
+  background:#050010;
+  color:#777;
+}
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.9);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:100;
+}
+.hidden{display:none;}
+#stage{
+  width:100%;
+  height:70vh;
+  display:block;
+}
+#hud{
+  position:absolute;
+  top:1rem;
+  left:1rem;
+  color:#fff;
+  font-family:'Orbitron',sans-serif;
+  font-size:1rem;
+  display:flex;
+  gap:2rem;
+}
+#startScreen{
+  font-size:1.5rem;
+  color:var(--neon);
+  text-align:center;
+  animation:blink 1.5s infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+/* Reveal animation */
+.reveal{
+  opacity:0;
+  transform:translateY(30px);
+  transition:opacity .6s ease-out,transform .6s ease-out;
+}
+.reveal.visible{opacity:1;transform:none;}
+</style>
+
+</head>
+<body>
+<header class="hero reveal">
+  <h1>NeonPulse Games</h1>
+  <p class="tagline">Dive into neon‑lit adventures</p>
+  <button id="playBtn">Play</button>
+</header>
+
+<main>
+  <section id="about" class="section reveal">
+    <h2>About NeonPulse</h2>
+    <p>We craft bite‑size, high‑octane browser games that pulse with neon vibes. From endless runners to quick puzzles, every title is built for instant fun on any device.</p>
+  </section>
+
+  <section id="leaderboard" class="section reveal">
+    <h2>Leaderboard</h2>
+    <p>Top scores from around the world will appear here soon. Stay tuned and claim your spot!</p>
+  </section>
+
+  <section id="contact" class="section reveal">
+    <h2>Contact</h2>
+    <p>Got feedback? Reach us at <a href="mailto:hello@neonpulse.games" style="color:var(--neon);text-decoration:none;">hello@neonpulse.games</a></p>
+  </section>
+</main>
+
+<footer>© 2026 NeonPulse Games</footer>
+
+<div id="gameOverlay" class="overlay hidden">
+  <div id="startScreen">Press Space or Tap to Start</div>
+  <div id="hud" class="hidden"><span id="score">Score: 0</span><span id="best">Best: 0</span></div>
+  <canvas id="stage"></canvas>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// ---------- DOM ----------
+const playBtn=document.getElementById('playBtn');
+const overlay=document.getElementById('gameOverlay');
+const startScreen=document.getElementById('startScreen');
+const hud=document.getElementById('hud');
+const scoreEl=document.getElementById('score');
+const bestEl=document.getElementById('best');
+const canvas=document.getElementById('stage');
+
+// ---------- THREE ----------
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),0.04).texture;
+
+const camera=new THREE.PerspectiveCamera(60,1,0.1,100);
+camera.position.set(0,1.2,5);
+const controls=new OrbitControls(camera,canvas);
+controls.enableDamping=true;
+controls.autoRotate=true;
+controls.target.set(0,0.8,0);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x222233,1));
+const key=new THREE.DirectionalLight(0xffffff,2);
+key.position.set(3,5,4);
+key.castShadow=true;
+scene.add(key);
+
+// ---------- GAME OBJECTS ----------
+let player, tunnel, obstacles=[];
+const laneX=[-1,0,1];
+let currentLane=1; // start centre
+let gameState='ready';
+let score=0;
+let best=localStorage.getItem('neonBest')||0;
+
+// Player (hovercraft)
+function createPlayer(){
+  const geom=new THREE.ConeGeometry(0.2,0.5,8);
+  const mat=new THREE.MeshStandardMaterial({color:0x00e5ff,emissive:0x00e5ff,emissiveIntensity:0.6});
+  const mesh=new THREE.Mesh(geom,mat);
+  mesh.rotation.x=Math.PI;
+  mesh.castShadow=true;
+  mesh.position.set(laneX[currentLane],0.8,0);
+  scene.add(mesh);
+  return mesh;
+}
+
+// Tunnel (inner cylinder)
+function createTunnel(){
+  const geom=new THREE.CylinderGeometry(5,5,200,32,1,true);
+  const mat=new THREE.MeshStandardMaterial({
+    color:0x111133,
+    side:THREE.BackSide,
+    emissive:0x5500ff,
+    emissiveIntensity:0.3,
+    transparent:true,
+    opacity:0.9
+  });
+  const mesh=new THREE.Mesh(geom,mat);
+  mesh.position.y=0.8;
+  scene.add(mesh);
+  return mesh;
+}
+
+// Obstacle (box)
+function spawnObstacle(){
+  const size=0.6;
+  const geom=new THREE.BoxGeometry(size,size,size);
+  const mat=new THREE.MeshStandardMaterial({color:0xff00ff,emissive:0xff00ff,emissiveIntensity:0.5});
+  const mesh=new THREE.Mesh(geom,mat);
+  const lane=Math.floor(Math.random()*3);
+  mesh.position.set(laneX[lane],0.8,-100);
+  mesh.userData.lane=lane;
+  mesh.castShadow=true;
+  scene.add(mesh);
+  obstacles.push(mesh);
+}
+
+// ---------- GAME LOGIC ----------
+function resetGame(){
+  // clear obstacles
+  obstacles.forEach(o=>scene.remove(o));
+  obstacles=[];
+  score=0;
+  scoreEl.textContent='Score: 0';
+  player.position.set(laneX[currentLane],0.8,0);
+  gameState='playing';
+  startScreen.classList.add('hidden');
+  hud.classList.remove('hidden');
+}
+function endGame(){
+  gameState='ready';
+  hud.classList.add('hidden');
+  startScreen.textContent='Game Over – Press Space or Tap to Restart';
+  startScreen.classList.remove('hidden');
+  if(score>best){best=score;localStorage.setItem('neonBest',best);}
+  bestEl.textContent='Best: '+best;
+}
+function update(delta){
+  if(gameState!=='playing')return;
+  // move tunnel forward
+  tunnel.position.z+=delta*20;
+  if(tunnel.position.z>0) tunnel.position.z=-100;
+  // spawn obstacles
+  if(Math.random()<0.02) spawnObstacle();
+  // move obstacles
+  obstacles.forEach(o=>{
+    o.position.z+=delta*20;
+    // collision
+    if(Math.abs(o.position.z-0)<0.5 && o.userData.lane===currentLane){
+      endGame();
+    }
+  });
+  // remove passed obstacles
+  obstacles = obstacles.filter(o=>{ if(o.position.z>5){scene.remove(o);return false;} return true; });
+  // score
+  score+=delta*10;
+  scoreEl.textContent='Score: '+Math.floor(score);
+}
+let lastTime=0;
+function animate(t){
+  const now=t*0.001;
+  const delta=now-lastTime;
+  lastTime=now;
+  update(delta);
+  controls.update();
+  renderer.render(scene,camera);
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+// ---------- INPUT ----------
+function moveLeft(){ if(currentLane>0){currentLane--; player.position.x=laneX[currentLane];}}
+function moveRight(){ if(currentLane<2){currentLane++; player.position.x=laneX[currentLane];}}
+window.addEventListener('keydown',e=>{
+  if(e.code==='Space'){
+    if(gameState==='ready') resetGame();
+  }
+  if(gameState==='playing'){
+    if(e.code==='ArrowLeft') moveLeft();
+    if(e.code==='ArrowRight') moveRight();
+  }
+});
+let touchStartX=0;
+canvas.addEventListener('touchstart',e=>{touchStartX=e.touches[0].clientX;});
+canvas.addEventListener('touchend',e=>{
+  const diff=e.changedTouches[0].clientX-touchStartX;
+  if(Math.abs(diff)>30){
+    if(diff>0) moveRight(); else moveLeft();
+  }else if(gameState==='ready'){
+    resetGame();
+  }
+});
+
+// ---------- RESIZE ----------
+function resize(){
+  const w=canvas.clientWidth, h=canvas.clientHeight;
+  renderer.setSize(w,h,false);
+  camera.aspect=w/h;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize',resize);
+resize();
+
+// ---------- UI ----------
+playBtn.addEventListener('click',()=>{overlay.classList.remove('hidden'); resetGame();});
+document.addEventListener('DOMContentLoaded',()=>{bestEl.textContent='Best: '+best;});
+
+// ---------- REVEAL ON SCROLL ----------
+const observer=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+<script>/* nixforge safety net: content never stays hidden, 3D failure degrades gracefully */
+(function(){function showAll(){document.querySelectorAll('section,[data-reveal],.reveal,.fade,.hidden-init').forEach(function(e){e.classList.add('show','visible','in','active','revealed');e.style.opacity='1';e.style.transform='none';});}
+window.addEventListener('error',function(e){console.error('nixforge-caught',e.message);showAll();document.documentElement.classList.add('no3d');});
+window.addEventListener('unhandledrejection',function(){showAll();});
+setTimeout(showAll,2500);
+try{var c=document.createElement('canvas');if(!(c.getContext('webgl2')||c.getContext('webgl')))document.documentElement.classList.add('no3d');}catch(_){document.documentElement.classList.add('no3d');}})();</script>
+<style>html.no3d canvas{background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.25),transparent 60%),linear-gradient(135deg,#2b2b40,#6a5acd 50%,#ff7a59);border-radius:16px}</style>
+</body>
+</html>

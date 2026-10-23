@@ -1,0 +1,28 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: 3d_games_site
+title: 3D Games Website
+tz: Asia/Kolkata
+status: active
+steps:
+- id: main
+  use: code
+  with:
+    source: |
+      def run(h):
+          brief = (
+              "Create a sleek, modern 3D gaming portal for casual gamers. "
+              "Brand: NeonPulse Games. Audience: teens and young adults who enjoy quick, immersive browser games. "
+              "Sections: Home with hero banner, Play button, About, Leaderboard, Contact. "
+              "Featured playable game: a futuristic endless‑runner where the player pilots a hovercraft through a glowing neon tunnel, dodging obstacles, with start screen, score, best‑score, and restart controls (keyboard arrows or swipe). "
+              "Mood: cyber‑punk, vibrant neon palette (electric blue, magenta, black, purple), futuristic UI, responsive design. "
+              "Technology: WebGL/Three.js, smooth animations, mobile‑friendly. "
+              "Include a screenshot preview and ensure the site is publicly hosted."
+          )
+          url = h.build_site(brief)
+          h.notify(f"🚀 Your 3D games website is live: {url}")
+          return url
+tests:
+- str(main).startswith('http')
+- main is not None
+request: Build a good looking 3D games website with at least one playable game inside it
+summary: A full 3D gaming portal with a neon endless‑runner game is built and published, and you get the live URL.
