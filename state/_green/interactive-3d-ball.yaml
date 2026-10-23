@@ -1,0 +1,27 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: interactive_3d_ball
+title: Interactive 3D Ball Experience
+tz: Asia/Kolkata
+status: active
+steps:
+- id: main
+  use: code
+  with:
+    source: |
+      def run(h):
+          brief = (
+              'An interactive, visually stunning 3D ball web experience using Three.js / WebGL. '
+              'Features a highly detailed 3D sphere with dynamic realistic materials (metallic, glass, iridescent sheen), '
+              'smooth orbit controls (drag to rotate, pinch/wheel to zoom), interactive physics or mouse bounce/gravity, '
+              'ambient + dynamic spot lighting with realistic shadows, particle dust effects in the background, '
+              'and clean minimalist UI controls to toggle textures, bounce, and light colors.'
+          )
+          url = h.build_site(brief)
+          h.notify(f'🔮 Your interactive 3D ball is live: {url}')
+          return url
+tests:
+- str(main).startswith('http')
+request: Create a 3d ball
+summary: |
+  Builds an interactive 3D ball web experience with smooth controls and dynamic lighting.
+  Sends the live interactive link directly to your Telegram.

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<meta charset="UTF-8">
+<title>Orbital Sphere • 3D Experience</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0a;
+  --fg:#f5f5f5;
+  --accent:#ff6b6b;
+  --ui-bg:rgba(255,255,255,.08);
+  --ui-fg:#fff;
+  --font-display:'Playfair Display',serif;
+  --font-body:'Poppins',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:var(--font-body);color:var(--fg);background:var(--bg);}
+h1{font-family:var(--font-display);font-size:2rem;text-align:center;margin:1rem 0;}
+#stage{display:block;width:100%;height:70vh;}
+.ui{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--ui-bg);
+  backdrop-filter:blur(8px);
+  display:flex;justify-content:center;gap:.5rem;padding:.5rem;
+  font-size:.9rem;
+}
+.ui button{
+  background:none;border:1px solid var(--ui-fg);
+  color:var(--ui-fg);padding:.4rem .8rem;
+  border-radius:4px;cursor:pointer;
+  transition:background .2s,transform .1s;
+}
+.ui button:hover,.ui button:focus{background:var(--accent);border-color:var(--accent);}
+.ui button:active{transform:scale(.96);}
+</style>
+</head>
+<body>
+<h1>Orbital Sphere</h1>
+<canvas id="stage"></canvas>
+<div class="ui">
+  <button id="matBtn">Material: Metal</button>
+  <button id="bounceBtn">Bounce: Off</button>
+  <button id="lightBtn">Light: White</button>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// ---- Renderer & Canvas ----
+const canvas = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias:true,
+  alpha:true,
+  preserveDrawingBuffer:true
+});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+// ---- Scene & Environment ----
+const scene = new THREE.Scene();
+scene.environment = new THREE.PMREMGenerator(renderer)
+  .fromScene(new RoomEnvironment(),0.04).texture;
+
+// ---- Camera & Controls ----
+const camera = new THREE.PerspectiveCamera(45,1,0.1,100);
+camera.position.set(0,1.2,4);
+const controls = new OrbitControls(camera,canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 2;
+controls.maxDistance = 8;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.5;
+
+// ---- Lights ----
+const hemi = new THREE.HemisphereLight(0xffffff,0x222233,0.9);
+scene.add(hemi);
+const dir = new THREE.DirectionalLight(0xffffff,2);
+dir.position.set(3,5,4);
+dir.castShadow = true;
+dir.shadow.mapSize.set(1024,1024);
+dir.shadow.camera.near = 0.5;
+dir.shadow.camera.far = 20;
+scene.add(dir);
+
+// ---- Floor (receives shadows) ----
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(10,10),
+  new THREE.MeshStandardMaterial({color:0x111111,roughness:0.9,metalness:0.1})
+);
+floor.rotation.x = -Math.PI/2;
+floor.receiveShadow = true;
+scene.add(floor);
+
+// ---- Sphere & Materials ----
+const sphere = new THREE.Mesh(
+  new THREE.SphereGeometry(0.8,64,64),
+  new THREE.MeshPhysicalMaterial({
+    metalness:1,roughness:0.2,clearcoat:0.5,clearcoatRoughness:0.1,color:0xdddddd
+  })
+);
+sphere.castShadow = true;
+sphere.position.y = 0.8;
+scene.add(sphere);
+
+const metalMat = new THREE.MeshPhysicalMaterial({
+  metalness:1,roughness:0.2,clearcoat:0.5,clearcoatRoughness:0.1,color:0xdddddd
+});
+const glassMat = new THREE.MeshPhysicalMaterial({
+  transmission:0.9,thickness:0.5,roughness:0,metalness:0,ior:1.5,color:0x88ccee
+});
+const irisMat = new THREE.MeshPhysicalMaterial({
+  metalness:0.5,roughness:0.1,clearcoat:1,clearcoatRoughness:0,
+  sheen:0.8,sheenColor:new THREE.Color(0x6a0dad),color:0xffffff
+});
+const materials = [metalMat,glassMat,irisMat];
+let matIndex = 0;
+
+// ---- Particle Dust ----
+const dustCount = 200;
+const dustGeo = new THREE.BufferGeometry();
+const pos = new Float32Array(dustCount*3);
+for(let i=0;i<dustCount;i++){
+  pos[i*3]   = (Math.random()-0.5)*6;
+  pos[i*3+1] = Math.random()*4;
+  pos[i*3+2] = (Math.random()-0.5)*6;
+}
+dustGeo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+const dust = new THREE.Points(dustGeo,
+  new THREE.PointsMaterial({size:0.02,color:0xffffff,transparent:true,opacity:0.6})
+);
+scene.add(dust);
+
+// ---- Physics (bounce) ----
+let bounce = false;
+let velY = 0;
+const GRAVITY = -0.015;
+const BOUNCE_DAMP = 0.7;
+function simulate(){
+  if(!bounce) return;
+  velY += GRAVITY;
+  sphere.position.y += velY;
+  if(sphere.position.y < 0.8){
+    sphere.position.y = 0.8;
+    velY = -velY*BOUNCE_DAMP;
+    if(Math.abs(velY)<0.001) velY = 0;
+  }
+}
+
+// ---- UI ----
+const matBtn = document.getElementById('matBtn');
+const bounceBtn = document.getElementById('bounceBtn');
+const lightBtn = document.getElementById('lightBtn');
+
+matBtn.addEventListener('click',()=>{
+  matIndex = (matIndex+1)%materials.length;
+  sphere.material = materials[matIndex];
+  const names = ['Metal','Glass','Iridescent'];
+  matBtn.textContent = `Material: ${names[matIndex]}`;
+});
+
+bounceBtn.addEventListener('click',()=>{
+  bounce = !bounce;
+  bounceBtn.textContent = `Bounce: ${bounce?'On':'Off'}`;
+});
+
+let lightState = 0;
+const lightColors = [0xffffff,0xff6b6b,0x6bffb8];
+const lightNames = ['White','Red','Green'];
+lightBtn.addEventListener('click',()=>{
+  lightState = (lightState+1)%lightColors.length;
+  dir.color.setHex(lightColors[lightState]);
+  lightBtn.textContent = `Light: ${lightNames[lightState]}`;
+});
+
+// ---- Resize ----
+function resize(){
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  renderer.setSize(w,h,false);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize',resize);
+resize();
+
+// ---- Animation Loop ----
+renderer.setAnimationLoop(()=>{
+  controls.update();
+  simulate();
+  dust.rotation.y += 0.0005;
+  renderer.render(scene,camera);
+});
+</script>
+
+<script>/* graceful fallback if WebGL fails */
+(function(){
+  function reveal(){document.querySelectorAll('.ui button').forEach(b=>b.style.opacity='1');}
+  window.addEventListener('error',()=>{document.documentElement.classList.add('no3d');reveal();});
+  window.addEventListener('unhandledrejection',reveal);
+  setTimeout(reveal,2000);
+  try{var c=document.createElement('canvas');if(!(c.getContext('webgl2')||c.getContext('webgl')))document.documentElement.classList.add('no3d');}catch(_){document.documentElement.classList.add('no3d');}
+})();
+</script>
+<style>
+html.no3d #stage{background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.25),transparent 60%),linear-gradient(135deg,#2b2b40,#6a5acd 50%,#ff7a59);border-radius:12px;}
+</style>
+<script>/* nixforge safety net: content never stays hidden, 3D failure degrades gracefully */
+(function(){function showAll(){document.querySelectorAll('section,[data-reveal],.reveal,.fade,.hidden-init').forEach(function(e){e.classList.add('show','visible','in','active','revealed');e.style.opacity='1';e.style.transform='none';});}
+window.addEventListener('error',function(e){console.error('nixforge-caught',e.message);showAll();document.documentElement.classList.add('no3d');});
+window.addEventListener('unhandledrejection',function(){showAll();});
+setTimeout(showAll,2500);
+try{var c=document.createElement('canvas');if(!(c.getContext('webgl2')||c.getContext('webgl')))document.documentElement.classList.add('no3d');}catch(_){document.documentElement.classList.add('no3d');}})();</script>
+<style>html.no3d canvas{background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.25),transparent 60%),linear-gradient(135deg,#2b2b40,#6a5acd 50%,#ff7a59);border-radius:16px}</style>
+</body>
+</html>
