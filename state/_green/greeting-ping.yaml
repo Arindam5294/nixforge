@@ -1,0 +1,20 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: greeting_ping
+title: Quick Check-in
+tz: Asia/Kolkata
+status: active
+steps:
+- id: main
+  use: code
+  with:
+    source: |
+      def run(h):
+          msg = "Yo! All systems operational and ready to roll. 🚀\n\nLet me know what workflow, watcher, or web app you want to build!"
+          h.notify(msg)
+          return msg
+tests:
+- '''operational'' in str(main)'
+request: Yo bro wassup
+summary: |
+  Sends a friendly status ping to your Telegram confirming everything is running.
+  Ready to tackle your next automation or project.

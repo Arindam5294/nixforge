@@ -36,5 +36,12 @@
       "ok": true,
       "note": "ok"
     }
+  ],
+  "greeting-ping": [
+    {
+      "at": "2026-10-23T05:11:45+00:00",
+      "ok": true,
+      "note": "ok"
+    }
   ]
 }
