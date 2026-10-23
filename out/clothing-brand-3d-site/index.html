@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<meta charset="UTF-8">
+<title>Nova Threads – Modern Fashion</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --nav:#0a0e27;          /* deep navy */
+  --bg:#f5f9ff;           /* soft teal‑white */
+  --accent:#00bfa5;      /* soft teal */
+  --gold:#d4af37;        /* gold accent */
+  --txt:#212529;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Inter',sans-serif;
+  color:var(--txt);
+  background:var(--bg);
+  line-height:1.6;
+}
+header{
+  position:sticky;top:0;z-index:10;background:var(--nav);
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0.8rem 1rem;
+}
+header h1{
+  font-family:'Playfair Display',serif;
+  color:#fff;
+  font-size:1.4rem;
+}
+nav a{
+  color:#fff;
+  margin-left:1rem;
+  text-decoration:none;
+  font-weight:500;
+  transition:color .2s;
+}
+nav a:hover{color:var(--accent);}
+section{
+  max-width:900px;
+  margin:auto;
+  padding:4rem 1rem;
+  opacity:0;
+  transform:translateY(20px);
+  transition:opacity .6s ease-out,transform .6s ease-out;
+}
+section.visible{opacity:1;transform:none;}
+h2{
+  font-family:'Playfair Display',serif;
+  font-size:2rem;
+  margin-bottom:1rem;
+  color:var(--nav);
+}
+h3{
+  font-family:'Playfair Display',serif;
+  font-size:1.4rem;
+  margin:0.5rem 0;
+  color:var(--nav);
+}
+p{margin-bottom:1rem;}
+.btn{
+  display:inline-block;
+  background:var(--accent);
+  color:#fff;
+  padding:.6rem 1.2rem;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  font-weight:500;
+  transition:transform .1s,background .2s;
+}
+.btn:active{transform:scale(.97);}
+.canvas-wrap{
+  position:relative;
+  width:100%;
+  height:70vh;
+  overflow:hidden;
+  border-radius:8px;
+}
+canvas{
+  width:100%;
+  height:100%;
+  display:block;
+}
+.swatch{
+  width:24px;height:24px;border-radius:50%;margin:0.3rem;
+  border:2px solid #fff;cursor:pointer;
+  box-shadow:0 0 2px rgba(0,0,0,.3);
+}
+.swatch:hover{outline:2px solid var(--accent);}
+.grid{
+  display:grid;
+  gap:2rem;
+}
+@media(min-width:600px){.grid{grid-template-columns:repeat(2,1fr);}}
+@media(min-width:900px){.grid{grid-template-columns:repeat(3,1fr);}}
+footer{
+  background:var(--nav);
+  color:#fff;
+  text-align:center;
+  padding:2rem 1rem;
+}
+footer a{color:var(--accent);text-decoration:none;}
+form input,form textarea{
+  width:100%;padding:.6rem;margin-bottom:.5rem;
+  border:1px solid #ccc;border-radius:4px;
+  font:inherit;
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Nova Threads</h1>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#collections">Collections</a>
+    <a href="#lookbook">Lookbook</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section id="home">
+  <h2>Elevate Your Style</h2>
+  <p>Discover the future of fashion with sleek designs, vibrant accents, and sustainable fabrics.</p>
+  <div class="canvas-wrap"><canvas id="stage-hero"></canvas></div>
+</section>
+
+<section id="about">
+  <h2>Our Story</h2>
+  <p>Founded in 2024, Nova Threads blends contemporary aesthetics with timeless craftsmanship. Our collections are inspired by the energy of urban life and the calm of the sea.</p>
+</section>
+
+<section id="collections">
+  <h2>Collections</h2>
+  <div class="grid">
+    <div>
+      <h3>Essence Tee</h3>
+      <div class="canvas-wrap"><canvas id="stage-tee"></canvas></div>
+      <div id="swatches-tee">
+        <span class="swatch" data-color="#ffffff" style="background:#fff;"></span>
+        <span class="swatch" data-color="#00bfa5" style="background:#00bfa5;"></span>
+        <span class="swatch" data-color="#212529" style="background:#212529;"></span>
+      </div>
+    </div>
+    <div>
+      <h3>Pulse Sneaker</h3>
+      <div class="canvas-wrap"><canvas id="stage-sneaker"></canvas></div>
+    </div>
+    <div>
+      <h3>Solar Shades</h3>
+      <div class="canvas-wrap"><canvas id="stage-sunglasses"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<section id="lookbook">
+  <h2>Lookbook</h2>
+  <p>Explore curated looks that blend our pieces into everyday moments.</p>
+  <div class="grid">
+    <div style="background:linear-gradient(135deg,var(--nav),var(--accent));height:200px;border-radius:8px;"></div>
+    <div style="background:linear-gradient(135deg,var(--nav),var(--gold));height:200px;border-radius:8px;"></div>
+    <div style="background:linear-gradient(135deg,var(--nav),var(--accent));height:200px;border-radius:8px;"></div>
+  </div>
+</section>
+
+<section id="contact">
+  <h2>Get In Touch</h2>
+  <p>Have a question or want to collaborate? Drop us a line.</p>
+  <form>
+    <input type="text" placeholder="Name" required>
+    <input type="email" placeholder="Email" required>
+    <textarea placeholder="Message" required></textarea>
+    <button class="btn" type="submit">Send Message</button>
+  </form>
+</section>
+
+<footer>
+  © 2024 Nova Threads. All rights reserved. <a href="mailto:hello@novathreads.com">hello@novathreads.com</a>
+</footer>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+function createViewer(canvasId, modelUrl, onLoad){
+  const canvas = document.getElementById(canvasId);
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias:true,
+    alpha:true,
+    preserveDrawingBuffer:true
+  });
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.shadowMap.enabled = true;
+
+  const scene = new THREE.Scene();
+  scene.environment = new THREE.PMREMGenerator(renderer)
+    .fromScene(new RoomEnvironment(),0.04).texture;
+
+  const camera = new THREE.PerspectiveCamera(40,1,0.1,100);
+  camera.position.set(0,1.2,5);
+
+  const controls = new OrbitControls(camera,canvas);
+  controls.enableDamping = true;
+  controls.autoRotate = true;
+  controls.target.set(0,0.8,0);
+
+  // lights
+  scene.add(new THREE.HemisphereLight(0xffffff,0x222233,1.2));
+  const key = new THREE.DirectionalLight(0xffffff,2.5);
+  key.position.set(3,5,4);
+  key.castShadow = true;
+  scene.add(key);
+
+  // floor
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(10,10),
+    new THREE.MeshStandardMaterial({color:0x111111,roughness:0.8})
+  );
+  floor.rotation.x = -Math.PI/2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  // load model
+  const loader = new GLTFLoader();
+  loader.load(modelUrl, gltf => {
+    const m = gltf.scene;
+    const box = new THREE.Box3().setFromObject(m);
+    const size = box.getSize(new THREE.Vector3()).length();
+    const center = box.getCenter(new THREE.Vector3());
+    m.position.sub(center);               // center
+    m.scale.setScalar(2.2/size);          // fit height ~2.2 units
+    m.position.y += 0.9;                  // lift onto floor
+    m.traverse(o => { if(o.isMesh){ o.castShadow = true; } });
+    scene.add(m);
+    if(onLoad) onLoad(m);
+  });
+
+  function resize(){
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    renderer.setSize(w,h,false);
+    camera.aspect = w/h;
+    camera.updateProjectionMatrix();
+  }
+  addEventListener('resize',resize);
+  resize();
+
+  renderer.setAnimationLoop(()=>{ controls.update(); renderer.render(scene,camera); });
+}
+
+/* Hero – T‑shirt */
+createViewer('stage-hero',
+  'https://cdn.jsdelivr.net/gh/Starklord17/threejs-t-shirt@main/public/shirt_baked.glb');
+
+/* Collections */
+createViewer('stage-tee',
+  'https://cdn.jsdelivr.net/gh/Starklord17/threejs-t-shirt@main/public/shirt_baked.glb',
+  model => {
+    const swatches = document.querySelectorAll('#swatches-tee .swatch');
+    swatches.forEach(s => s.addEventListener('click',()=>{
+      const col = new THREE.Color(s.dataset.color);
+      model.traverse(o=>{ if(o.isMesh && o.material){ o.material.color.copy(col); } });
+    }));
+  });
+
+createViewer('stage-sneaker',
+  'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb');
+
+createViewer('stage-sunglasses',
+  'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/SunglassesKhronos/glTF-Binary/SunglassesKhronos.glb');
+
+/* Scroll reveal */
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+},{threshold:0.1});
+document.querySelectorAll('section').forEach(s=>observer.observe(s));
+</script>
+<script>/* nixforge safety net: content never stays hidden, 3D failure degrades gracefully */
+(function(){function showAll(){document.querySelectorAll('section,[data-reveal],.reveal,.fade,.hidden-init').forEach(function(e){e.classList.add('show','visible','in','active','revealed');e.style.opacity='1';e.style.transform='none';});}
+window.addEventListener('error',function(e){console.error('nixforge-caught',e.message);showAll();document.documentElement.classList.add('no3d');});
+window.addEventListener('unhandledrejection',function(){showAll();});
+setTimeout(showAll,2500);
+try{var c=document.createElement('canvas');if(!(c.getContext('webgl2')||c.getContext('webgl')))document.documentElement.classList.add('no3d');}catch(_){document.documentElement.classList.add('no3d');}})();</script>
+<style>html.no3d canvas{background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.25),transparent 60%),linear-gradient(135deg,#2b2b40,#6a5acd 50%,#ff7a59);border-radius:16px}</style>
+</body>
+</html>

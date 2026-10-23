@@ -1,0 +1,19 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: clothing_brand_3d_site
+title: Sample Clothing Brand 3D Website
+tz: Asia/Kolkata
+status: active
+steps:
+- id: main
+  use: code
+  with:
+    source: |
+      def run(h):
+          brief = "Create a 3D interactive website for a sample clothing brand called 'Nova Threads'. Target audience: young adults 18-30, fashion‑forward. Sections: Home with hero 3D runway, About, Collections with 3D rotating garment models, Lookbook, Contact. 3D subject: rotating mannequins displaying clothing, interactive product viewer. Mood: modern, sleek, minimalist with vibrant accents. Colours: deep navy, soft teal, white, gold accents."
+          url = h.build_site(brief)
+          h.notify(f"🛍️ Your 3D clothing brand website is live: {url}")
+          return url
+tests:
+- str(main).startswith('http')
+request: Okay prepare a sample clothing brand 3d website
+summary: A 3D website for a sample clothing brand is built and a live link is sent to you.
