@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<meta charset="UTF-8">
+<title>GateAgriPrep – Master GATE Agricultural Engineering</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --clr-primary:#2E7D32;   /* deep green */
+  --clr-secondary:#795548;/* earthy brown */
+  --clr-accent:#FF9800;   /* orange */
+  --clr-bg:#FAFAFA;
+  --clr-text:#212121;
+  --font-display:'Playfair Display',serif;
+  --font-body:'Poppins',sans-serif;
+}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  background:var(--clr-bg);
+  color:var(--clr-text);
+  line-height:1.6;
+  scroll-behavior:smooth;
+}
+.dark{
+  --clr-bg:#212121;
+  --clr-text:#FAFAFA;
+  --clr-primary:#81C784;
+  --clr-secondary:#A1887F;
+  --clr-accent:#FFB74D;
+}
+header{
+  position:sticky;top:0;z-index:10;
+  background:var(--clr-primary);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0.8rem 1rem;
+}
+header h1{
+  font-family:var(--font-display);
+  font-size:1.2rem;
+  margin:0;
+}
+nav a{
+  color:#fff;
+  text-decoration:none;
+  margin:0 .5rem;
+  font-weight:600;
+  position:relative;
+  transition:transform .2s;
+}
+nav a:hover{transform:scale(1.1);}
+.toggle{
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:1.2rem;
+  cursor:pointer;
+}
+section{
+  padding:2rem 1rem;
+  max-width:900px;
+  margin:auto;
+  opacity:0;
+  transform:translateY(30px);
+  transition:all .6s;
+}
+section.visible{opacity:1;transform:none;}
+h2{
+  font-family:var(--font-display);
+  font-size:2rem;
+  margin-bottom:.5rem;
+  color:var(--clr-primary);
+}
+h3{
+  font-family:var(--font-display);
+  margin:0 0 .4rem;
+  color:var(--clr-primary);
+}
+.btn{
+  display:inline-block;
+  background:var(--clr-accent);
+  color:#fff;
+  padding:.6rem 1.2rem;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  font-weight:600;
+  transition:transform .2s;
+}
+.btn:hover{transform:scale(1.05);}
+.grid{
+  display:grid;
+  gap:1.5rem;
+}
+@media(min-width:600px){.grid{grid-template-columns:repeat(2,1fr);}}
+@media(min-width:900px){.grid{grid-template-columns:repeat(3,1fr);}}
+canvas{
+  width:100%;
+  height:100%;
+  display:block;
+}
+#lab{
+  height:70vh;
+  overflow:hidden;
+  border-radius:8px;
+  margin:1rem 0;
+  background:#eaeaea;
+}
+footer{
+  background:var(--clr-secondary);
+  color:#fff;
+  padding:1rem;
+  text-align:center;
+}
+ul{padding-left:1.2rem;}
+li{margin:.4rem 0;}
+</style>
+</head>
+<body>
+<header>
+  <h1>GateAgriPrep</h1>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#courses">Courses</a>
+    <a href="#lab">Virtual Lab</a>
+    <a href="#practice">Practice</a>
+    <a href="#leaderboard">Leaderboard</a>
+    <a href="#profile">Profile</a>
+    <a href="#resources">Resources</a>
+  </nav>
+  <button class="toggle" aria-label="Toggle dark mode">🌙</button>
+</header>
+
+<section id="home">
+  <h2>Welcome to the Future of GATE Prep</h2>
+  <p>Engineered for engineering students, GateAgriPrep blends immersive 3D labs, AI‑driven flashcards, and gamified progress tracking—all wrapped in an eco‑friendly, sleek design.</p>
+  <button class="btn">Start Learning</button>
+</section>
+
+<section id="courses">
+  <h2>Our Courses</h2>
+  <div class="grid">
+    <div>
+      <h3>Fundamentals of Agri‑Engineering</h3>
+      <p>Core concepts, video lectures, and interactive modules.</p>
+      <button class="btn">Enroll – ₹2,999</button>
+    </div>
+    <div>
+      <h3>Soil & Water Engineering</h3>
+      <p>Deep dive into irrigation, drainage, and soil mechanics.</p>
+      <button class="btn">Enroll – ₹3,199</button>
+    </div>
+    <div>
+      <h3>Farm Machinery & Power</h3>
+      <p>Hands‑on virtual lab with animated equipment.</p>
+      <button class="btn">Enroll – ₹3,499</button>
+    </div>
+  </div>
+</section>
+
+<section id="lab">
+  <h2>3D Virtual Lab – Campus Tour</h2>
+  <canvas id="stage"></canvas>
+</section>
+
+<section id="practice">
+  <h2>Practice Tests</h2>
+  <p>Timed quizzes with instant feedback and AI‑generated hints.</p>
+  <button class="btn">Take a Mock Test</button>
+</section>
+
+<section id="leaderboard">
+  <h2>Leaderboard</h2>
+  <div class="grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div><strong>Rank</strong></div><div><strong>Name</strong></div><div><strong>Score</strong></div>
+    <div>1</div><div>Aisha K.</div><div>98%</div>
+    <div>2</div><div>Rohit S.</div><div>95%</div>
+    <div>3</div><div>Meena P.</div><div>93%</div>
+  </div>
+</section>
+
+<section id="profile">
+  <h2>Your Dashboard</h2>
+  <div class="grid">
+    <div>
+      <h3>Progress</h3>
+      <p>Courses completed: <strong>2/5</strong></p>
+      <p>Overall score: <strong>84%</strong></p>
+    </div>
+    <div>
+      <h3>Flashcards</h3>
+      <p>AI‑suggested cards: <strong>45</strong></p>
+      <button class="btn">Review Now</button>
+    </div>
+  </div>
+</section>
+
+<section id="resources">
+  <h2>Resources</h2>
+  <ul>
+    <li>📄 GATE 2024 Syllabus PDF</li>
+    <li>📚 Recommended Textbooks</li>
+    <li>🎥 Lecture Series (YouTube)</li>
+    <li>💬 Community Forum</li>
+  </ul>
+</section>
+
+<footer>
+  © 2026 GateAgriPrep. All rights reserved.
+</footer>
+
+<script>
+// Dark mode toggle
+document.querySelector('.toggle').addEventListener('click',()=>{
+  document.body.classList.toggle('dark');
+});
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// ----- 3D Setup -----
+const canvas = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias:true,
+  alpha:true,
+  preserveDrawingBuffer:true
+});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+
+const scene = new THREE.Scene();
+scene.environment = new THREE.PMREMGenerator(renderer)
+  .fromScene(new RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(45,1,0.1,100);
+camera.position.set(0,1.2,5);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.autoRotate = true;
+controls.target.set(0,0.8,0);
+
+// Lights
+scene.add(new THREE.HemisphereLight(0xffffff,0x222233,1.2));
+const key = new THREE.DirectionalLight(0xffffff,2.5);
+key.position.set(3,5,4);
+key.castShadow = true;
+key.shadow.mapSize.width = 1024;
+key.shadow.mapSize.height = 1024;
+scene.add(key);
+
+// Ground (receives shadows)
+const groundGeo = new THREE.PlaneGeometry(20,20);
+const groundMat = new THREE.MeshStandardMaterial({color:0x555555,roughness:0.9});
+const ground = new THREE.Mesh(groundGeo,groundMat);
+ground.rotation.x = -Math.PI/2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// ----- Build a recognisable tractor -----
+const tractor = new THREE.Group();
+
+// Body
+const bodyGeo = new THREE.BoxGeometry(2,0.6,1);
+const bodyMat = new THREE.MeshStandardMaterial({color:0x2E7D32,roughness:0.4,metalness:0.1});
+const body = new THREE.Mesh(bodyGeo,bodyMat);
+body.castShadow = true;
+body.position.y = 0.8;
+tractor.add(body);
+
+// Cabin
+const cabinGeo = new THREE.BoxGeometry(0.8,0.5,0.9);
+const cabinMat = new THREE.MeshStandardMaterial({color:0x795548,roughness:0.5});
+const cabin = new THREE.Mesh(cabinGeo,cabinMat);
+cabin.castShadow = true;
+cabin.position.set(-0.4,1.1,0);
+tractor.add(cabin);
+
+// Wheels
+function createWheel(){
+  const geo = new THREE.CylinderGeometry(0.3,0.3,0.4,32);
+  const mat = new THREE.MeshStandardMaterial({color:0x333333,roughness:0.6});
+  const wheel = new THREE.Mesh(geo,mat);
+  wheel.rotation.z = Math.PI/2;
+  wheel.castShadow = true;
+  return wheel;
+}
+const wheelFL = createWheel(); wheelFL.position.set(0.8,0.5,0.5);
+const wheelFR = createWheel(); wheelFR.position.set(0.8,0.5,-0.5);
+const wheelRL = createWheel(); wheelRL.position.set(-0.8,0.5,0.5);
+const wheelRR = createWheel(); wheelRR.position.set(-0.8,0.5,-0.5);
+tractor.add(wheelFL,wheelFR,wheelRL,wheelRR);
+
+// Add tractor to scene
+scene.add(tractor);
+
+// Wheel animation
+function spinWheels(){
+  const sp = 0.05;
+  wheelFL.rotation.x += sp;
+  wheelFR.rotation.x += sp;
+  wheelRL.rotation.x += sp;
+  wheelRR.rotation.x += sp;
+}
+
+// Resize handling
+function resize(){
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  renderer.setSize(w,h,false);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize',resize);
+resize();
+
+// Render loop
+renderer.setAnimationLoop(()=>{
+  controls.update();
+  spinWheels();
+  renderer.render(scene,camera);
+});
+</script>
+
+<script>
+// Reveal on scroll
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting) entry.target.classList.add('visible');
+  });
+},{threshold:0.1});
+document.querySelectorAll('section').forEach(s=>observer.observe(s));
+</script>
+
+<script>
+// Graceful fallback if WebGL fails
+(function(){
+  function showAll(){document.querySelectorAll('section').forEach(s=>s.classList.add('visible'));}
+  window.addEventListener('error',()=>{showAll();document.documentElement.classList.add('no3d');});
+  window.addEventListener('unhandledrejection',showAll);
+  setTimeout(showAll,2500);
+  try{
+    const c=document.createElement('canvas');
+    if(!(c.getContext('webgl2')||c.getContext('webgl'))) document.documentElement.classList.add('no3d');
+  }catch(_){document.documentElement.classList.add('no3d');}
+})();
+</script>
+<style>
+html.no3d canvas{
+  background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.25),transparent 60%),
+              linear-gradient(135deg,#2b2b40,#6a5acd 50%,#ff7a59);
+  border-radius:16px;
+}
+</style>
+<script>/* nixforge safety net: content never stays hidden, 3D failure degrades gracefully */
+(function(){function showAll(){document.querySelectorAll('section,[data-reveal],.reveal,.fade,.hidden-init').forEach(function(e){e.classList.add('show','visible','in','active','revealed');e.style.opacity='1';e.style.transform='none';});}
+window.addEventListener('error',function(e){console.error('nixforge-caught',e.message);showAll();document.documentElement.classList.add('no3d');});
+window.addEventListener('unhandledrejection',function(){showAll();});
+setTimeout(showAll,2500);
+try{var c=document.createElement('canvas');if(!(c.getContext('webgl2')||c.getContext('webgl')))document.documentElement.classList.add('no3d');}catch(_){document.documentElement.classList.add('no3d');}})();</script>
+<style>html.no3d canvas{background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.25),transparent 60%),linear-gradient(135deg,#2b2b40,#6a5acd 50%,#ff7a59);border-radius:16px}</style>
+</body>
+</html>

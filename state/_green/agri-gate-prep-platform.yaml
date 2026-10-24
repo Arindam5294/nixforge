@@ -1,0 +1,28 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: agri_gate_prep_platform
+title: High‑class GATE Agricultural Engineering Preparation Platform
+tz: Asia/Kolkata
+status: active
+steps:
+- id: main
+  use: code
+  with:
+    source: |
+      def run(h):
+          brief = (
+              "Create an interactive web platform for GATE Agricultural Engineering exam preparation. "
+              "Target audience: engineering students preparing for GATE. "
+              "Brand: professional, sleek, eco‑friendly with deep green, earthy brown, crisp white and accent orange. "
+              "Sections: Home, Courses, 3D Virtual Lab (immersive campus tour with animated farm equipment and lab setups), Practice Tests, Leaderboard, Profile, Resources. "
+              "Features: modern UI, gamified progress dashboard, animated study modules, video lectures, timed quizzes, community forum, AI‑assisted flashcards. "
+              "Mood: inspiring, energetic, immersive, high‑class, keeping users engaged and not bored. "
+              "Include responsive design, smooth 3D interactions, and optional dark mode."
+          )
+          url = h.build_site(brief)
+          h.notify(f"🚀 Your high‑class GATE Agricultural Engineering prep platform is live: {url}")
+          return url
+tests:
+- main is not None
+- str(main).startswith('http')
+request: Read this html and prepare a high class gate agricultural engineering preparation platform for me with awesome 3d build and ui so that I don't get bored
+summary: A polished, 3D‑rich web platform for GATE Agricultural Engineering prep is built and the live URL is sent via Telegram.
