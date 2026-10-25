@@ -46,3 +46,8 @@
 - 🩹 healer reads tracebacks and rewrites broken code silently
 - 🧹 retired the hollow `repeat` / `threejs_build` evolutions and their test workflows
 - forged by Swanix 🐸
+
+## v0.5 · 2026-10-25 · E1
+- 🧬 evolved: Periodic Messaging (new block `repeat`)
+- why: Enables sending repeated messages at set intervals, filling the gap for timed notifications
+- approved by Swanix 🐸

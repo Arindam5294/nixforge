@@ -9,10 +9,10 @@
       "risk": "May be misused for spamming if not rate‑limited",
       "block_name": "repeat",
       "block_doc": "repeat(action, interval_seconds, count) -> executes the given side‑effect action repeatedly",
-      "status": "approved",
+      "status": "shipped",
       "source": "request I couldn't do yet: Let's suppose say me hi every 1 second for next 5 seconds",
       "at": "2026-10-19T19:04:24+00:00",
-      "version": "0.2",
+      "version": "0.5",
       "note": "replaced by the universal code block in v0.4"
     },
     "E2": {
