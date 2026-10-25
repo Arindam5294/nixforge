@@ -1,5 +1,5 @@
 {
-  "next": 3,
+  "next": 4,
   "items": {
     "E1": {
       "worth_it": true,
@@ -28,6 +28,18 @@
       "at": "2026-10-19T19:10:58+00:00",
       "version": "0.3",
       "note": "replaced by the universal code block in v0.4"
+    },
+    "E3": {
+      "worth_it": true,
+      "title": "Flexible Selector Block",
+      "why": "Handles pages where expected elements may be missing, reducing heal failures",
+      "what": "Adds a select_any block that tries multiple CSS selectors and returns the first successful match (or empty)",
+      "risk": "Minimal – only adds a utility function",
+      "block_name": "select_any",
+      "block_doc": "select_any(html, selectors:list, all=False, attr=None) -> text or list of texts",
+      "status": "pitched",
+      "source": "weekly self-review",
+      "at": "2026-10-25T08:43:03+00:00"
     }
   }
 }
