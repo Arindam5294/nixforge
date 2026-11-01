@@ -1,5 +1,5 @@
 {
-  "next": 4,
+  "next": 5,
   "items": {
     "E1": {
       "worth_it": true,
@@ -40,6 +40,18 @@
       "status": "failed",
       "source": "weekly self-review",
       "at": "2026-10-25T08:43:03+00:00"
+    },
+    "E4": {
+      "worth_it": true,
+      "title": "Safe Selector Block",
+      "why": "Prevents workflow failures when CSS selectors miss, reducing manual patches",
+      "what": "Adds a select_safe(html, css, all=false, attr=null) block that returns empty string if no match instead of error",
+      "risk": "Minimal – just adds a wrapper around existing select logic",
+      "block_name": "select_safe",
+      "block_doc": "select_safe(html, css, all=False, attr=None) -> str or list: returns matched text or empty if none",
+      "status": "pitched",
+      "source": "weekly self-review",
+      "at": "2026-11-01T10:47:17+00:00"
     }
   }
 }
