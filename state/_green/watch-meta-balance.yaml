@@ -1,0 +1,46 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: watch_meta_balance
+title: Watch Meta AI platform balance
+tz: Asia/Kolkata
+status: active
+schedule: '*/15 * * * *'
+steps:
+- id: main
+  use: code
+  with:
+    source: |
+      def run(h):
+          url = "https://dev.meta.ai/platform?team_id=1088004594136263&project_id=1866178231489141"
+          try:
+              html = h.fetch(url, timeout=10)
+          except Exception as e:
+              h.log(f"fetch error: {e}")
+              return {"error":"fetch"}
+          soup = h.soup(html)
+          text = soup.get_text(separator=' ', strip=True)
+          import re
+          # try patterns like "$23" or "credits: $23" etc.
+          m = re.search(r"(\d+(?:\.\d+)?)\s*\$|credits?\s*[:\-]?\s*\$?(\d+(?:\.\d+)?)", text, re.I)
+          balance = None
+          if m:
+              balance = float(m.group(1) or m.group(2))
+          else:
+              m2 = re.search(r"(\d+(?:\.\d+)?)\s*(?:credits?|balance)", text, re.I)
+              if m2:
+                  balance = float(m2.group(1))
+          if balance is None:
+              h.log("Balance not found")
+              return {"status":"not_found"}
+          prev_below = h.state.get("below", False)
+          below = balance < 25
+          h.state["below"] = below
+          if below and not prev_below:
+              h.notify(f"⚠️ Alert: Available balance credits dropped below $25. Current: ${balance:.2f}")
+          return {"balance": balance, "alerted": below and not prev_below}
+tests:
+- main is not None
+request: |
+  Keep watching this page ..https://dev.meta.ai/platform?team_id=1088004594136263&project_id=1866178231489141
+
+  Hard Caution alerts whenever it crosses available balance credits below 25$
+summary: Continuously checks the Meta AI platform page every 15 minutes and sends a Telegram warning when credits fall below $25.

@@ -71,5 +71,12 @@
       "ok": true,
       "note": "ok"
     }
+  ],
+  "watch-meta-balance": [
+    {
+      "at": "2026-11-02T07:56:34+00:00",
+      "ok": true,
+      "note": "ok"
+    }
   ]
 }
