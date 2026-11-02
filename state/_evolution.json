@@ -49,7 +49,7 @@
       "risk": "Minimal – just adds a wrapper around existing select logic",
       "block_name": "select_safe",
       "block_doc": "select_safe(html, css, all=False, attr=None) -> str or list: returns matched text or empty if none",
-      "status": "pitched",
+      "status": "approved",
       "source": "weekly self-review",
       "at": "2026-11-01T10:47:17+00:00"
     }
