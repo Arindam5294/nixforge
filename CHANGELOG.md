@@ -51,3 +51,8 @@
 - 🧬 evolved: Periodic Messaging (new block `repeat`)
 - why: Enables sending repeated messages at set intervals, filling the gap for timed notifications
 - approved by Swanix 🐸
+
+## v0.6 · 2026-11-02 · E4
+- 🧬 evolved: Safe Selector Block (new block `select_safe`)
+- why: Prevents workflow failures when CSS selectors miss, reducing manual patches
+- approved by Swanix 🐸
