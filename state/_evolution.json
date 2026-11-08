@@ -1,5 +1,5 @@
 {
-  "next": 5,
+  "next": 6,
   "items": {
     "E1": {
       "worth_it": true,
@@ -53,6 +53,18 @@
       "source": "weekly self-review",
       "at": "2026-11-01T10:47:17+00:00",
       "version": "0.6"
+    },
+    "E5": {
+      "worth_it": true,
+      "title": "Three.js Template Fallback Block",
+      "why": "Ensures 3D site builds succeed even when external templates are missing",
+      "what": "Adds a block that fetches a template URL; if it 404s, uses a built‑in minimal three.js HTML template and publishes the site",
+      "risk": "Minor increase in storage usage",
+      "block_name": "threejs_template_fallback",
+      "block_doc": "threejs_template_fallback(url:str, output_path:str) -> str: Publishes a three.js site using the given URL or a built‑in fallback template if the URL fails, returns the public URL",
+      "status": "pitched",
+      "source": "weekly self-review",
+      "at": "2026-11-08T10:44:30+00:00"
     }
   }
 }
