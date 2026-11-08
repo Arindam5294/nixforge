@@ -1,0 +1,26 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: fetch_15
+title: Fetch /15 page
+tz: Asia/Kolkata
+status: active
+steps:
+- id: main
+  use: code
+  with:
+    source: |
+      def run(h):
+          try:
+              # Attempt to fetch the full URL assuming https and example.com as base
+              url = 'https://example.com/15'
+              page = h.fetch(url)
+              # Trim to first 500 characters for brevity
+              snippet = page[:500] + ('...' if len(page) > 500 else '')
+              h.notify(f'Fetched content from {url}:\n{snippet}')
+              return {'url': url, 'snippet': snippet}
+          except Exception as e:
+              h.notify(f'Error fetching {url}: {e}')
+              return {'error': str(e)}
+tests:
+- main is not None
+request: /15
+summary: Fetches https://example.com/15 and sends a short preview via Telegram.
