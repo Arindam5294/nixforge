@@ -1,0 +1,46 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: itc_careers_watch
+title: Watch ITC Careers for Internships
+tz: Asia/Kolkata
+status: active
+steps:
+- id: main
+  use: code
+  with:
+    source: |
+      def run(h):
+          import re, json
+          url = 'https://recruitment.itcportal.com/jobs/Careers'
+          try:
+              html = h.fetch(url)
+          except Exception as e:
+              h.log(f'Fetch failed: {e}')
+              return {'error':'fetch_failed'}
+          soup = h.soup(html)
+          # Find all job links; pattern: /jobs/Careers/<id>/<slug>
+          job_links = soup.select('a[href*="/jobs/Careers/"]')
+          alerts = []
+          keywords = re.compile(r"\b(intern|internship|kites|summer|trainee)\b", re.I)
+          for a in job_links:
+              href = a.get('href')
+              # Ensure full URL
+              if not href.startswith('http'):
+                  href = 'https://recruitment.itcportal.com' + href
+              title = a.get_text(strip=True)
+              if not title:
+                  continue
+              if not keywords.search(title):
+                  continue
+              # Extract job id from URL
+              m = re.search(r"/jobs/Careers/(\d+)/", href)
+              job_id = m.group(1) if m else href
+              key = f'job_{job_id}'
+              if h.changed(key, True):
+                  msg = f"🚨 *{title}*\n{href}\n\nAPPLY NOWWW"
+                  h.notify(msg)
+                  alerts.append({'title':title,'link':href})
+          return {'alerts':alerts,'count':len(alerts)}
+tests:
+- main is not None
+request: Watch ITC's careers portal https://recruitment.itcportal.com/jobs/Careers every 5 minutes. Read every job's Posting_Title. If any title matches intern, internship, KITES, summer or trainee, send me a Telegram alert with the job title and its direct link (https://recruitment.itcportal.com/jobs/Careers/<job id>/<title-slug>?source=CareerSite) plus a big APPLY NOWWW line. Otherwise stay silent. Alert once per new job, not every run.
+summary: Monitors ITC Careers every 5 minutes and Telegram‑alerts new internship‑type jobs. Alerts are sent only once per newly posted position.
