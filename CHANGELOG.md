@@ -56,3 +56,8 @@
 - 🧬 evolved: Safe Selector Block (new block `select_safe`)
 - why: Prevents workflow failures when CSS selectors miss, reducing manual patches
 - approved by Swanix 🐸
+
+## v0.7 · 2026-11-08 · E3
+- 🧬 evolved: Flexible Selector Block (new block `select_any`)
+- why: Handles pages where expected elements may be missing, reducing heal failures
+- approved by Swanix 🐸

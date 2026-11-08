@@ -37,9 +37,10 @@
       "risk": "Minimal – only adds a utility function",
       "block_name": "select_any",
       "block_doc": "select_any(html, selectors:list, all=False, attr=None) -> text or list of texts",
-      "status": "approved",
+      "status": "shipped",
       "source": "weekly self-review",
-      "at": "2026-10-25T08:43:03+00:00"
+      "at": "2026-10-25T08:43:03+00:00",
+      "version": "0.7"
     },
     "E4": {
       "worth_it": true,
