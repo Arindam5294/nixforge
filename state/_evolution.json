@@ -1,5 +1,5 @@
 {
-  "next": 6,
+  "next": 7,
   "items": {
     "E1": {
       "worth_it": true,
@@ -66,6 +66,18 @@
       "status": "approved",
       "source": "weekly self-review",
       "at": "2026-11-08T10:44:30+00:00"
+    },
+    "E6": {
+      "worth_it": true,
+      "title": "Add declarative build_site block",
+      "why": "Users frequently request web apps and 3D websites, but requests get rejected when planners look for a dedicated block.\nA first-class block exposes existing site-generation capabilities directly to workflow planning.",
+      "what": "Expose the internal site generator as a top-level workflow block that takes a prompt brief, builds and tests the app, and returns the live public URL.",
+      "risk": "Generation takes longer than standard text steps and depends on LLM code quality.",
+      "block_name": "build_site",
+      "block_doc": "build_site(brief: str) -> str: builds, tests, and publishes a web app or 3D site, returning its public URL",
+      "status": "pitched",
+      "source": "weekly self-review",
+      "at": "2026-11-09T00:35:54+00:00"
     }
   }
 }
