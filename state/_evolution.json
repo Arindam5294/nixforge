@@ -87,7 +87,7 @@
       "risk": "Minimal, only adds a thin wrapper around existing blocks",
       "block_name": "fetch_select",
       "block_doc": "fetch_select(url, css, all=False, attr=None) -> str|list: fetches the URL then applies safe selection (like select_safe)",
-      "status": "pitched",
+      "status": "shelved",
       "source": "weekly self-review",
       "at": "2026-11-15T11:27:02+00:00"
     }
