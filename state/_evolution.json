@@ -1,5 +1,5 @@
 {
-  "next": 7,
+  "next": 8,
   "items": {
     "E1": {
       "worth_it": true,
@@ -78,6 +78,18 @@
       "status": "failed",
       "source": "weekly self-review",
       "at": "2026-11-09T00:35:54+00:00"
+    },
+    "E7": {
+      "worth_it": true,
+      "title": "Integrated fetch and safe select block",
+      "why": "Prevents selector‑not‑found errors in heal steps and streamlines common fetch‑select patterns",
+      "what": "Adds fetch_select(url, css, all=False, attr=None) that fetches a page and safely returns the selected text or empty value",
+      "risk": "Minimal, only adds a thin wrapper around existing blocks",
+      "block_name": "fetch_select",
+      "block_doc": "fetch_select(url, css, all=False, attr=None) -> str|list: fetches the URL then applies safe selection (like select_safe)",
+      "status": "pitched",
+      "source": "weekly self-review",
+      "at": "2026-11-15T11:27:02+00:00"
     }
   }
 }
