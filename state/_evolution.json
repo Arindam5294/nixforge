@@ -1,5 +1,5 @@
 {
-  "next": 8,
+  "next": 9,
   "items": {
     "E1": {
       "worth_it": true,
@@ -90,6 +90,18 @@
       "status": "shelved",
       "source": "weekly self-review",
       "at": "2026-11-15T11:27:02+00:00"
+    },
+    "E8": {
+      "worth_it": true,
+      "title": "Robust selector fallback",
+      "why": "Prevents failures when page structures change",
+      "what": "Adds a block that tries multiple CSS selectors and returns the first successful match, reducing broken selectors in existing workflows",
+      "risk": "Minimal – only adds a utility function",
+      "block_name": "select_fallback",
+      "block_doc": "select_fallback(html, selectors:list, all=False, attr=None) -> text or list: returns the first non‑empty result from the given selectors",
+      "status": "pitched",
+      "source": "weekly self-review",
+      "at": "2026-11-22T11:53:07+00:00"
     }
   }
 }
