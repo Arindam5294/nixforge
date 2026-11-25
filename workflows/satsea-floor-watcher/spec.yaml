@@ -1,0 +1,50 @@
+# ⚒ NIXFORGE workflow — forged by Swanix 🐸
+id: satsea_floor_watcher
+title: SatSea floor price watcher
+tz: Asia/Kolkata
+status: active
+steps:
+- id: main
+  use: code
+  with:
+    source: |
+      def run(h):
+          import re, json
+          url = 'https://satsea.xyz/collection/1'
+          try:
+              html = h.fetch(url)
+          except Exception as e:
+              h.log(f'Fetch error: {e}')
+              return {'error':'fetch_failed'}
+          # Find all dollar amounts in the page
+          prices = re.findall(r'\$\s*([0-9,.]+)', html)
+          price = None
+          if prices:
+              # take the first occurrence assuming it is the floor price
+              try:
+                  price = float(prices[0].replace(',',''))
+              except ValueError:
+                  price = None
+          if price is None:
+              h.log('Could not parse floor price')
+              return {'price':None}
+          # State tracking for alerts
+          state = h.state
+          alerted_50 = state.get('alerted_50', False)
+          alerted_100 = state.get('alerted_100', False)
+          alerts = []
+          if price >= 50 and not alerted_50:
+              h.notify(f"🔴 Red alert: floor price reached $50 (current ${price:.2f})")
+              state['alerted_50'] = True
+              alerts.append('50')
+          if price >= 100 and not alerted_100:
+              h.notify(f"🔴 Red alert: floor price reached $100 – sell now! (current ${price:.2f})")
+              state['alerted_100'] = True
+              alerts.append('100')
+          # Save state back
+          h.state = state
+          return {'price':price,'alerts_sent':alerts}
+tests:
+- main.get('price') is not None
+request: "Keep watching this page and send me a 1st red alert when it reaches 50$ minimum floor price then 2nd alert on 100$ to sell now \n\nhttps://satsea.xyz/collection/1\n"
+summary: Monitors SatSea floor price every 15 min, alerts on Telegram when it hits $50 and again at $100.

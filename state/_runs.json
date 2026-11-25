@@ -187,5 +187,12 @@
       "ok": true,
       "note": "ok"
     }
+  ],
+  "satsea-floor-watcher": [
+    {
+      "at": "2026-11-25T03:48:13+00:00",
+      "ok": false,
+      "note": "test failed: main.get('price') is not None"
+    }
   ]
 }

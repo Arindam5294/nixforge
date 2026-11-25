@@ -1,7 +1,7 @@
 {
   "_day": {
-    "date": "2026-10-23",
-    "count": 1
+    "date": "2026-11-25",
+    "count": 3
   },
   "heal-demo": {
     "incident": "cdd462e3",
@@ -44,5 +44,12 @@
     "probation": false,
     "last_fix": "Syntax error caused by escaped newline characters in the code source string",
     "healed_at": "2026-10-23T05:22:20+00:00"
+  },
+  "satsea-floor-watcher": {
+    "incident": "1014bf1f",
+    "tries": 0,
+    "broken_since": "2026-11-25T03:48:13+00:00",
+    "cooldown_until": "2026-11-25T09:48:13+00:00",
+    "last_giveup": "3 fix attempts didn't work (last error: after your last patch (step tests): test failed: main.get('price') is not None)"
   }
 }

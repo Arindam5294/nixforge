@@ -1,0 +1,9 @@
+{
+  "wf": "satsea-floor-watcher",
+  "step": "tests",
+  "error": "test failed: main.get('price') is not None",
+  "hint": "",
+  "trace": "Traceback (most recent call last):\n  File \"/home/runner/work/nixforge/nixforge/forge/runner.py\", line 92, in run_real\n    execute(wf_id, spec, inputs)\n  File \"/home/runner/work/nixforge/nixforge/forge/runner.py\", line 68, in execute\n    raise err\nforge.runner.TestFailure: test failed: main.get('price') is not None\n",
+  "inputs": {},
+  "at": "2026-11-25T03:48:13+00:00"
+}
